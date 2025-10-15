@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Debug All",
+      "configurations": ["Debug Vite"],
+      "stopAll": true
+    }
+  ],
+  "configurations": [
+    {
+      "name": "Debug Vite",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "skipFiles": ["<node_internals>/**"],
+      "console": "integratedTerminal",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  ]
+}

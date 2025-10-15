@@ -1,0 +1,23 @@
+{
+  "extends": "../../packages/config/tsconfig.backend.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "target": "es6",
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipDefaultLibCheck": true,
+    "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": {
+      "*": ["*", "./node_modules/*"]
+    },
+    "esModuleInterop": false,
+    "allowJs": true,
+    "outDir": "out"
+  },
+  "include": ["./serverless/**/*", "serverless.ts", "./app/**/*", "./logging/**/*"],
+  "exclude": ["dist", "**/*.test.ts"]
+}

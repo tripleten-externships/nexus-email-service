@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,500;1,500&display=swap');
+
+@import 'tailwindcss';
+
+@layer base {
+  html {
+    font-family:
+      'Rubik',
+      system-ui sans-serif;
+  }
+}
+
+/* App Layout Styles */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background-color: #f8f9fa;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.app-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+/* Home Page Styles */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.home-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.home-subtitle {
+  font-size: 1.25rem;
+  color: #666;
+}
+
+/* Welcome Page Styles */
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.welcome-text {
+  font-size: 1.25rem;
+  color: #666;
+}
+
+/* Loading Spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.loading-spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border-left-color: #007aff;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

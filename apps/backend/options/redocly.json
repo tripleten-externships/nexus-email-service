@@ -1,0 +1,8 @@
+{
+  "spec": "error",
+  "path-parameters-defined": "error",
+  "operation-2xx-response": "error",
+  "operation-4xx-response": "error",
+  "operation-operationId-unique": "error",
+  "path-declaration-must-exist": "error"
+}

@@ -1,0 +1,51 @@
+services:
+  mongodb:
+    image: mongo:8.0
+    container_name: 'mongodb'
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - queuenetwork
+  elasticmq:
+    image: softwaremill/elasticmq-native
+    container_name: 'sls-elasticmq'
+    ports:
+      - 9324:9324
+      - 9325:9325
+    volumes:
+      - ./elasticmq.conf:/opt/elasticmq.conf
+    networks:
+      - queuenetwork
+  jaeger:
+    networks:
+      - queuenetwork
+      - jaeger_network
+    image: jaegertracing/jaeger:${JAEGER_VERSION:-latest}
+    ports:
+      - '16686:16686'
+      - '8888:8888'
+      - '8889:8889'
+      - '4317:4317'
+      - '4318:4318'
+  nginx:
+    image: nginx:latest
+    container_name: jaeger_nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 4319:4318
+    depends_on:
+      - jaeger
+    networks:
+      - jaeger_network
+
+networks:
+  jaeger_network:
+    driver: bridge
+  queuenetwork:
+    driver: bridge
+
+volumes:
+  mongodb_data:

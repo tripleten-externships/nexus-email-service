@@ -1,0 +1,10 @@
+{
+  "name": "tripleten-email-service",
+  "version": "1.0.0",
+  "description": "Packaged externals for tripleten-email-service",
+  "private": true,
+  "scripts": {},
+  "dependencies": {
+    "mongodb": "^6.19.0"
+  }
+}

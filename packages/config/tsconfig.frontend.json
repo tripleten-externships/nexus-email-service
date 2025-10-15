@@ -1,0 +1,15 @@
+{
+  "extends": "../config/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "jsx": "react-jsx"
+  },
+  "include": ["src", "app"]
+}

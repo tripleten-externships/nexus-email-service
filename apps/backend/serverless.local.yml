@@ -1,0 +1,57 @@
+service: tripleten-email-service
+
+useDotenv: true
+configValidationMode: warn
+
+plugins:
+  - serverless-offline-ssm
+  - serverless-offline-sqs
+  - serverless-dotenv-plugin
+  - serverless-iam-roles-per-function
+  - serverless-openapi-documenter
+  - serverless-offline
+
+custom:
+  documentation: ${file(docs/openapi-config.yml):documentation}
+  serverless-offline-ssm:
+    stages:
+      - local
+    ssm:
+      local-send_grid_sqs_url: 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo'
+      local-send_grid_sqs_arn: 'arn:aws:sqs:us-east-1:000000000000:SendGridLocalQueue.fifo'
+  esbuild:
+    bundle: true
+    minify: false
+    target: 'node22'
+    sourcemap: true
+    external: ['mongodb', '@aws-sdk']
+    plugins: './plugins.js'
+  serverless-offline:
+    httpPort: ${env:PORT, 3002}
+    lambdaPort: ${env:LAMBDA_PORT, 3004}
+    host: ${env:HOST, '127.0.0.1'}
+    printOutput: false
+    noPrependStageInUrl: true
+  serverless-offline-sqs:
+    autoCreate: true
+    apiVersion: '2012-11-05'
+    endpoint: http://127.0.0.1:9324
+    region: us-east-1
+    accessKeyId: root
+    secretAccessKey: root
+    skipCacheInvalidation: false
+    waitTimeSeconds: 20
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  timeout: 300
+  environment:
+    DEPLOYMENT_ENV: 'local'
+    ACTIVE_AWS_REGION: 'us-east-1'
+    # SENDGRID_EVENTS_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url, ''}
+    # SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, ''}
+
+resources: ${file(./resources.local.yml)}
+
+functions: ${file(./functions.yml)}

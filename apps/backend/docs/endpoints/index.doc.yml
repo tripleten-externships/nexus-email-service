@@ -1,0 +1,26 @@
+summary: 'Index'
+description: "It returns an object with the 'message' key and the legend 'TRIPLETEN service'. In the future, it may display the API version (TBD)."
+operationId: 'getIndex'
+tags:
+  - 'Public'
+headerParams:
+  - name: 'Content-Type'
+    description: "Content Type header. Only 'application/json' is supported in this version."
+    schema:
+      type: 'string'
+methodResponses:
+  - statusCode: 200
+    responseBody:
+      description: 'Successful response'
+    responseModels:
+      application/json: 'IndexResponse'
+  - statusCode: 400
+    responseBody:
+      description: 'Bad request'
+    responseModels:
+      application/json: 'Error'
+  - statusCode: 500
+    responseBody:
+      description: 'Server error'
+    responseModels:
+      application/json: 'Error'

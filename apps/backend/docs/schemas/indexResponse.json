@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IndexResponse",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "The message. For now it's 'TRIPLETEN service' but may contain the API version and other information."
+    }
+  }
+}
