@@ -1,0 +1,101 @@
+service: tripleten-internal-api
+useDotenv: true
+configValidationMode: warn
+plugins:
+  - serverless-domain-manager
+  - serverless-openapi-documenter
+  - serverless-iam-roles-per-function
+custom:
+  siteKey: tripleten
+  esbuild:
+    bundle: true
+    minify: false
+    target: 'node22'
+    sourcemap: false
+    packager: 'npm'
+    external: ['mongodb', '@aws-sdk']
+    plugins: './plugins.js'
+  nodeEnv:
+    dev: development
+    staging: production
+    prod: production
+  rootURL:
+    dev: https://app-dev.internal-tripleten.com
+    staging: https://qa-app.internal-tripleten.com
+    prod: https://app.internal-tripleten.com
+  logRetention:
+    dev: 14
+    staging: 14
+    prod: 120 # One of these values (days) [0 1 3 5 7 14 30 60 90 120 150 180 365 400 545 731 1827 3653]
+  # serverless-domain-manager config
+  customDomain:
+    domainName: api-${sls:stage}.internal-tripleten.com
+    basePath: ''
+    stage: ${opt:stage, 'dev'}
+    certificateArn: ${ssm:${self:custom.siteKey}-${sls:stage}_domain_cert_arn}
+    certificateName: api-${sls:stage}.internal-tripleten.com
+    createRoute53Record: true
+    createRoute53IPv6Record: true
+    autoDomain: true
+    autoDomainWaitFor: 120
+    endpointType: 'regional'
+    securityPolicy: tls_1_2
+    hostedZoneId: ${ssm:${self:custom.siteKey}_domain_zone_id}
+  documentation: ${file(docs/main.doc.yml):documentation}
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ${opt:region, 'us-east-1'}
+  apiName: tripleten-internal-api # Use a custom name for the API Gateway API
+  stage: ${opt:stage,'staging'} # Set the default stage used. Default is staging
+  memorySize: 512
+  timeout: 26 # Default is 6 seconds. Note: API Gateway current maximum is 30 seconds. Currently, Express is set to 25 secs.
+  logRetentionInDays: ${self:custom.logRetention.${sls:stage}} # Set the default RetentionInDays for a CloudWatch LogGroup
+  environment: # Service wide environment variables
+    NODE_ENV: ${self:custom.nodeEnv.${sls:stage}}
+    AWS_SDK_USED: node
+    region: ${opt:region, 'us-east-1'}
+    stage: ${sls:stage}
+    MONGO_SSM_PARAM: '${self:custom.siteKey}-${sls:stage}_mongo_url'
+    PORT: 3002
+    LAMBDA_PORT: 3004
+    DEPLOYMENT_ENV: ${sls:stage}
+    ROOT_URL: ${self:custom.rootURL.${sls:stage}}
+    SENDGRID_EVENTS_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url}
+    SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn}
+    ACTIVE_AWS_REGION: ${opt:region, 'us-east-1'}
+  endpointType: REGIONAL
+  apiGateway: # Takes the API gateway ID from SSM parameters
+    restApiId: ${ssm:${self:custom.siteKey}-internal-${sls:stage}_id}
+    restApiRootResourceId: ${ssm:${self:custom.siteKey}-internal-${sls:stage}_root_resource_id} # Root resource ID, represent as / path
+    minimumCompressionSize: 1024 # Compress response when larger than specified size in bytes (must be between 0 and 10485760)
+    metrics: true
+  iam:
+    role: # These permits will be applied to ALL functions in this file.
+      statements:
+        - Effect: Allow
+          Action: # Needed so it can see MongoDB
+            - ec2:CreateNetworkInterface
+            - ec2:DescribeNetworkInterfaces
+            - ec2:DeleteNetworkInterface
+            - ec2:DescribeInstances
+            - ec2:AttachNetworkInterface
+            - autoscaling:CompleteLifecycleAction
+            - SSM:GetParameter
+            - cloudwatch:PutMetricData
+          Resource: '*'
+  stackTags:
+    site: tripleten
+    environment: ${sls:stage}
+  tags:
+    site: tripleten
+    environment: ${sls:stage}
+  vpc: # System-wide VPC
+    securityGroupIds:
+      - ${ssm:${self:custom.siteKey}-internal-${sls:stage}_sec_group}
+    subnetIds:
+      - ${ssm:${self:custom.siteKey}-${sls:stage}_vpc_private_subnet_id_0}
+      - ${ssm:${self:custom.siteKey}-${sls:stage}_vpc_private_subnet_id_1}
+  logs:
+    httpApi: true
+functions: ${file(./functions.yml)}

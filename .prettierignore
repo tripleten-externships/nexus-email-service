@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+.next
+coverage
+*.log
+.env*
+.DS_Store
+.keystone
+**/__generated__/**
+test-results
+storybook-static 

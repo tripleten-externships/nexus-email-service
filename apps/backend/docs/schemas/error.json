@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Common Error Structure",
+  "type": "object",
+  "properties": {
+    "errorMessage": {
+      "type": "string",
+      "description": "The error key, IE: invalidPayload.",
+      "example": "invalidPayload"
+    },
+    "statusCode": {
+      "type": "number",
+      "description": "The returned statusCode. It's the same as the returned HTTP status code.",
+      "example": 400
+    }
+  }
+}

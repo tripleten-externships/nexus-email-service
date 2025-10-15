@@ -1,0 +1,23 @@
+{
+  "extends": "./packages/config/tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@nexus-email/*": ["packages/*/src"]
+    }
+  },
+  "include": ["packages/*/src/**/*", "apps/backend/src/**/*"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    "coverage",
+    "apps/*/node_modules",
+    "packages/*/node_modules",
+    "apps/frontend/.storybook",
+    "apps/frontend/storybook-static",
+    "apps/frontend/src/**/*",
+    "apps/frontend/app/**/*"
+  ]
+}

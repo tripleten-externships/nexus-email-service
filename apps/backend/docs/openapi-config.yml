@@ -1,0 +1,18 @@
+documentation:
+  title: 'TripleTen Email Service API'
+  description: 'TripleTen Email Service public API.'
+  version: 'v1.0.0'
+  servers:
+    - url: 'https://api.internal-tripleten.com'
+      description: 'Production server'
+    - url: 'http://127.0.0.1:3002'
+      description: 'Local development server'
+  models:
+    - name: 'IndexResponse'
+      description: 'This is the response model for the index endpoint.'
+      contentType: 'application/json'
+      schema: ${file(docs/schemas/indexResponse.json)}
+    - name: 'Error'
+      description: 'This is the model for any error returned to the client.'
+      contentType: 'application/json'
+      schema: ${file(docs/schemas/error.json)}

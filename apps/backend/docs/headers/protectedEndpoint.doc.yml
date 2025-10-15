@@ -1,0 +1,10 @@
+headers:
+  - name: 'Content-Type'
+    description: "Content Type header. Only 'application/json' is supported in this version."
+    schema:
+      type: 'string'
+  - name: 'Authorization'
+    description: 'Authorization header. It should contain the auth token, which is a 43-byte long string.'
+    schema:
+      type: 'string'
+      pattern: '^[a-zA-Z0-9_-]{43}$'

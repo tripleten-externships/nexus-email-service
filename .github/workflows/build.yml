@@ -1,0 +1,220 @@
+name: Build and Package
+
+on:
+  push:
+    branches:
+      - main
+      - 'develop'
+  pull_request:
+    branches:
+      - main
+      - 'develop'
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  set_matrix:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set Matrix Based on Branch
+        id: set-matrix
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo 'matrix={"environment":["staging"]}' >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo 'matrix={"environment":["dev"]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"environment":[]}' >> $GITHUB_OUTPUT
+          fi
+
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: [set_matrix]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+    outputs:
+      backend_package: ${{ steps.package-backend.outputs.package_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run backend tests
+        working-directory: ./apps/backend
+        run: npm test
+        env:
+          MONGO_URL: mongodb://localhost:27017/tripleten
+
+      - name: Run backend linting
+        working-directory: ./apps/backend
+        run: npm run lint
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Package Serverless Backend
+        id: package-backend
+        working-directory: ./apps/backend
+        run: |
+          echo "Packaging serverless backend for ${{ matrix.environment }} environment..."
+          npm run build
+          echo "package_name=rest-proj" >> $GITHUB_OUTPUT
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    needs: [set_matrix]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        working-directory: ./apps/frontend
+        run: npm test
+
+      - name: Build frontend application
+        run: npm run frontend:build
+        env:
+          VITE_API_URL: ${{ secrets.API_URL }}
+          DEPLOYMENT_ENV: ${{ matrix.environment }}
+
+  build-storybook:
+    runs-on: ubuntu-latest
+    needs: [set_matrix]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run storybook:build
+
+  build-packages:
+    runs-on: ubuntu-latest
+    needs: [set_matrix]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build
+
+  test-all:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend, build-storybook, build-packages]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+
+    services:
+      mongodb:
+        image: mongo:8.0
+        ports:
+          - 27017:27017
+
+    env:
+      MONGO_URL: mongodb://localhost:27017/tripleten
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run all tests
+        run: npm test
+
+      - name: Run all linting
+        run: npm run lint
+
+      - name: Type check
+        run: npm run type-check
+
+  trigger_deploy_workflow:
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend, build-storybook, build-packages]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    outputs:
+      BACKEND_PACKAGE: ${{ needs.build-backend.outputs.backend_package }}
+    steps:
+      - name: Trigger Deploy Workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: 'deploy'
+          client-payload: |
+            {
+              "version": "${{ github.sha }}",
+              "environment": "${{ github.ref == 'refs/heads/main' && 'staging' || github.ref == 'refs/heads/develop' && 'dev' }}",
+              "backend_package": "${{ needs.build-backend.outputs.backend_package }}",
+              "deploy_backend": true,
+              "deploy_frontend": true,
+              "deploy_storybook": true
+            }

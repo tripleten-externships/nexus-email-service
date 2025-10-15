@@ -1,0 +1,196 @@
+name: Deploy
+
+on:
+  # workflow_dispatch allows triggering deployments manually
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy'
+        required: false
+        type: string
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+      deploy_backend:
+        description: 'Backend'
+        type: boolean
+        required: true
+        default: true
+      deploy_frontend:
+        description: 'Frontend'
+        type: boolean
+        required: true
+        default: true
+      deploy_storybook:
+        description: 'Storybook'
+        type: boolean
+        required: true
+        default: true
+  # repository_dispatch allows triggering deployments programmatically from build.yml
+  repository_dispatch:
+    types: [deploy]
+
+# Concurrency control to avoid multiple deployments to the same environment
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.event_name == 'repository_dispatch' && github.event.client_payload.environment }}
+  cancel-in-progress: true # cancels in-progress deployments for the same group
+
+# Dynamic run name
+run-name: |
+  ${{ github.event_name == 'workflow_dispatch' && (
+    github.event.inputs.deploy_backend == 'true' && github.event.inputs.deploy_frontend == 'true' && github.event.inputs.deploy_storybook == 'true' && 'FULL' || 'PARTIAL'
+  ) || github.event_name == 'repository_dispatch' && (
+    github.event.client_payload.deploy_backend == true && github.event.client_payload.deploy_frontend == true && github.event.client_payload.deploy_storybook == true && 'FULL' || 'PARTIAL'
+  ) }} Deploy ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version || github.event.client_payload.version }} to ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.event.client_payload.environment }} by @${{ github.actor }}
+
+permissions:
+  actions: write
+  contents: write
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+
+jobs:
+  set_matrix:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set Matrix Based on Branch or Workflow Dispatch
+        id: set-matrix
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo 'matrix={"environment":["${{ github.event.inputs.environment }}"]}' >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo 'matrix={"environment":["staging"]}' >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
+            echo 'matrix={"environment":["dev"]}' >> $GITHUB_OUTPUT
+          else
+            echo 'matrix={"environment":[]}' >> $GITHUB_OUTPUT
+          fi
+
+  deploy-backend:
+    needs: [set_matrix]
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_backend == 'true') && (github.event_name != 'repository_dispatch' || github.event.client_payload.deploy_backend == true)
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy Serverless Application
+        env:
+          ENVIRONMENT: ${{ matrix.environment }}
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+        run: |
+          chmod +x .github/scripts/package-serverless.sh
+          .github/scripts/package-serverless.sh
+
+  deploy-frontend:
+    needs: [set_matrix]
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_frontend == 'true') && (github.event_name != 'repository_dispatch' || github.event.client_payload.deploy_frontend == true)
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build frontend application
+        run: npm run frontend:build
+        env:
+          VITE_API_URL: ${{ secrets.API_URL }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy frontend to S3 bucket
+        working-directory: ./apps/frontend
+        run: |
+          aws s3 sync dist/ s3://${{ secrets.BUCKET_NAME }} --delete
+          aws s3 cp dist/index.html s3://${{ secrets.BUCKET_NAME }}/index.html --cache-control "no-cache"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.DISTRIBUTION_ID }} \
+            --paths "/*"
+
+  deploy-storybook:
+    needs: [set_matrix]
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch') && (github.event_name != 'workflow_dispatch' || github.event.inputs.deploy_storybook == 'true') && (github.event_name != 'repository_dispatch' || github.event.client_payload.deploy_storybook == true)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJson(needs.set_matrix.outputs.matrix) }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install frontend dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build Storybook
+        run: npm run storybook:build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy Storybook to S3
+        working-directory: ./apps/frontend
+        run: |
+          aws s3 sync storybook-static/ s3://${{ secrets.STORYBOOK_BUCKET_NAME }} --delete
+
+      - name: Invalidate Storybook CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.STORYBOOK_DISTRIBUTION_ID }} \
+            --paths "/*"

@@ -1,0 +1,5 @@
+headers:
+  - name: 'Content-Type'
+    description: "Content Type header. Only 'application/json' is supported in this version."
+    schema:
+      type: 'string'

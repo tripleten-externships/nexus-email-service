@@ -1,0 +1,26 @@
+Resources:
+  SendGridLocalDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SendGridLocalDLQ.fifo
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      BatchSize: 10
+      VisibilityTimeout: 30
+      MessageRetentionPeriod: 345600
+      KmsMasterKeyId: alias/aws/sqs
+      KmsDataKeyReusePeriodSeconds: 300
+  SendGridLocalQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SendGridLocalQueue.fifo
+      FifoQueue: true
+      ContentBasedDeduplication: true
+      BatchSize: 10
+      VisibilityTimeout: 30
+      MessageRetentionPeriod: 345600
+      KmsMasterKeyId: alias/aws/sqs
+      KmsDataKeyReusePeriodSeconds: 300
+      RedrivePolicy:
+        deadLetterTargetArn: arn:aws:sqs:us-east-1:000000000000:SendGridLocalDLQ.fifo
+        maxReceiveCount: 5

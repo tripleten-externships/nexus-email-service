@@ -1,0 +1,17 @@
+projectDir: ../
+documentation:
+  openapi: 3.0.0
+  version: v1-1.0.0
+  title: 'TripleTen API'
+  description: 'TripleTen public API.'
+  servers:
+    - url: 'https://api.internal-tripleten.com'
+  models:
+    - name: 'IndexResponse'
+      description: 'This is the response model for the index endpoint.'
+      contentType: 'application/json'
+      schema: ${file(docs/schemas/indexResponse.json)}
+    - name: 'Error'
+      description: 'This is the model for any error returned to the client.'
+      contentType: 'application/json'
+      schema: ${file(docs/schemas/error.json)}
