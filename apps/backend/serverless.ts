@@ -22,19 +22,16 @@ exports.handler = (event, context) => {
 };
 
 process.on('SIGINT', (): void => {
-  // eslint-disable-next-line no-console
   console.log('SIGINT detected. Exiting... Bye!');
   process.exit(1);
 });
 process.on('uncaughtException', (): void => {
-  // eslint-disable-next-line no-console
   console.log('uncaughtException. Exiting... Bye!');
   process.exit(2);
 });
 process.on('unhandledRejection', (reason) => {
-  // eslint-disable-next-line no-console
   console.log('Unhandled Rejection:');
-  // eslint-disable-next-line no-console
+
   console.log(reason);
   process.exit(3);
 });

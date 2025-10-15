@@ -3,7 +3,7 @@ const typescriptParser = require('@typescript-eslint/parser');
 
 module.exports = [
   {
-    ignores: ['dist', 'build', 'node_modules/**', 'coverage/**', '.keystone/**', 'schema.prisma'],
+    ignores: ['dist', 'build', 'node_modules/**', 'coverage/**', '.esbuild/**'],
   },
   {
     files: ['**/*.js'],

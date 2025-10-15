@@ -26,12 +26,11 @@ interface EndpointParams {
   route: string;
   run: (
     // Typing `data` as any because Record<string, unknown> causes more issues than it solves
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     data: any,
     ipAddress: string,
     req: express.Request
     // Typing the return value as `any` because Record<string, unknown> causes more issues than it solves
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) => Promise<any>;
   errorHandler?: (err: unknown, data?: Record<string, unknown>) => void;
 }

@@ -8,11 +8,10 @@ module.exports = [
       'build',
       'node_modules/**',
       'coverage/**',
-      '.next/**',
-      '.keystone/**',
       'storybook-static/**',
       '**/__generated__/**',
       'test-results/**',
+      '**/node_modules/**',
     ],
   },
   {
