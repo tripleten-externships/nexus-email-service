@@ -4,7 +4,6 @@ import app from './app/app';
 
 require('dotenv').config();
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const debug = require('debug')('server:server');
 
 /**
@@ -13,7 +12,6 @@ const debug = require('debug')('server:server');
 const normalizePort = (val: string): string | number | boolean => {
   const testPort = parseInt(val, 10);
 
-  // eslint-disable-next-line no-restricted-globals
   if (isNaN(testPort)) {
     // named pipe
     return val;
@@ -32,7 +30,6 @@ const normalizePort = (val: string): string | number | boolean => {
  */
 const port = normalizePort(process.env.PORT || '7777');
 
-// eslint-disable-next-line no-console
 console.log(`Listening on port ${port}`);
 
 app.set('port', port);
@@ -56,12 +53,10 @@ const onError = (error): void => {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      // eslint-disable-next-line no-console
       console.error(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      // eslint-disable-next-line no-console
       console.error(`${bind} is already in use`);
       process.exit(1);
       break;
@@ -84,12 +79,11 @@ const onListening = (): void => {
  * Event listener for HTTP server "close" event.
  */
 const exitHandler = async (signal: string): Promise<void> => {
-  // eslint-disable-next-line no-console
   console.log(`${signal} detected. Closing DB connections...`);
   if (connection) {
     await connection.close();
   }
-  // eslint-disable-next-line no-console
+
   console.log('Bye bye!');
   process.exit();
 };
