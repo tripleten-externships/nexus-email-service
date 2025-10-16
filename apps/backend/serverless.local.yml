@@ -49,8 +49,6 @@ provider:
   environment:
     DEPLOYMENT_ENV: 'local'
     ACTIVE_AWS_REGION: 'us-east-1'
-    # SENDGRID_EVENTS_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url, ''}
-    # SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, ''}
 
 resources: ${file(./resources.local.yml)}
 
