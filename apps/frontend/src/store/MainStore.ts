@@ -1,5 +1,4 @@
 import { makeAutoObservable } from 'mobx';
-
 export class MainStore {
   count = 0;
 
