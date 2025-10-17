@@ -9,6 +9,11 @@
 
 ## Testing / Steps to reproduce
 
+## Definition of Done Requirements (All Pull Requests)
+
+- [ ] Changes to serverless handlers require updated OpenAPI documentation
+- [ ] My code has been instrumented with otel and verified spans are correctly associated, where applicable
+
 ## Checklist before requesting a review
 
 - [ ] I have performed a self-review of my code
