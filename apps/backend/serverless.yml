@@ -61,8 +61,6 @@ provider:
     LAMBDA_PORT: 3004
     DEPLOYMENT_ENV: ${sls:stage}
     ROOT_URL: ${self:custom.rootURL.${sls:stage}}
-    SENDGRID_EVENTS_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url}
-    SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn}
     ACTIVE_AWS_REGION: ${opt:region, 'us-east-1'}
   endpointType: REGIONAL
   apiGateway: # Takes the API gateway ID from SSM parameters
