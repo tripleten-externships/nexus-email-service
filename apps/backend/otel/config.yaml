@@ -1,72 +1,72 @@
-# receivers:
-#   otlp:
-#     protocols:
-#       grpc:
-#         endpoint: 'localhost:4317'
-#       http:
-#         endpoint: 'localhost:4318'
-# processors:
-#   ## The memory_limiter processor is used to prevent out of memory situations on the collector.
-#   memory_limiter:
-#     ## check_interval is the time between measurements of memory usage for the
-#     ## purposes of avoiding going over the limits. Defaults to zero, so no
-#     ## checks will be performed. Values below 1 second are not recommended since
-#     ## it can result in unnecessary CPU consumption.
-#     check_interval: 5s
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 'localhost:4317'
+      http:
+        endpoint: 'localhost:4318'
+processors:
+  ## The memory_limiter processor is used to prevent out of memory situations on the collector.
+  memory_limiter:
+    ## check_interval is the time between measurements of memory usage for the
+    ## purposes of avoiding going over the limits. Defaults to zero, so no
+    ## checks will be performed. Values below 1 second are not recommended since
+    ## it can result in unnecessary CPU consumption.
+    check_interval: 5s
 
-#     ## Maximum amount of memory, in MiB, targeted to be allocated by the process heap.
-#     ## Note that typically the total memory usage of process will be about 50MiB higher
-#     ## than this value.
-#     limit_mib: 1900
+    ## Maximum amount of memory, in MiB, targeted to be allocated by the process heap.
+    ## Note that typically the total memory usage of process will be about 50MiB higher
+    ## than this value.
+    limit_mib: 1900
 
-#   ## The batch processor accepts spans and places them into batches grouped by node and resource
-#   batch:
-#     ## Number of spans after which a batch will be sent regardless of time
-#     send_batch_size: 512
-#     ## Never more than this many spans are being sent in a batch
-#     send_batch_max_size: 2048
-#     ## Time duration after which a batch will be sent regardless of size
-#     timeout: 10s
+  ## The batch processor accepts spans and places them into batches grouped by node and resource
+  batch:
+    ## Number of spans after which a batch will be sent regardless of time
+    send_batch_size: 512
+    ## Never more than this many spans are being sent in a batch
+    send_batch_max_size: 2048
+    ## Time duration after which a batch will be sent regardless of size
+    timeout: 10s
 
-#   resource:
-#     attributes:
-#       - action: upsert
-#         key: service.name
-#         value: 'nexus-email-service-traces'
-#       - action: upsert
-#         key: environment
-#         value: $$DEPLOYMENT_ENV
-#       - action: upsert
-#         key: application
-#         value: 'nexus-email-service'
-#       - action: upsert
-#         key: deployment.environment
-#         value: $$DEPLOYMENT_ENV
+  resource:
+    attributes:
+      - action: upsert
+        key: service.name
+        value: 'nexus-email-service-traces'
+      - action: upsert
+        key: environment
+        value: $$DEPLOYMENT_ENV
+      - action: upsert
+        key: application
+        value: 'nexus-email-service'
+      - action: upsert
+        key: deployment.environment
+        value: $$DEPLOYMENT_ENV
 
-# extensions:
-#   health_check: {}
-# exporters:
-#   otlphttp:
-#     traces_endpoint: $$SUMO_OTLP_HTTP_ENDPOINT_URL
-#   # awsxray:
-#   #   region: us-east-1
-#   ## Following generates verbose logs with span content, useful to verify what
-#   ## metadata is being tagged. To enable, uncomment and add "logging" to exporters below.
-#   ## There are two levels that could be used: `debug` and `info` with the former
-#   ## being much more verbose and including (sampled) spans content
-#   logging:
-#     loglevel: debug
-# service:
-#   extensions: [health_check]
-#   pipelines:
-#     traces:
-#       receivers: [otlp]
-#       processors: [memory_limiter, batch, resource]
-#       exporters: [otlphttp]
-#   ## Following generates verbose logs with span content, useful to verify what
-#   ## metadata is being tagged. To enable, uncomment and add "telemetry.logs" to service below.
-#   ## There are two levels that could be used: `debug` and `info` with the former
-#   ## being much more verbose and including (sampled) spans content
-#   telemetry:
-#     logs:
-#       level: debug
+extensions:
+  health_check: {}
+exporters:
+  otlphttp:
+    traces_endpoint: $$SUMO_OTLP_HTTP_ENDPOINT_URL
+  # awsxray:
+  #   region: us-east-1
+  ## Following generates verbose logs with span content, useful to verify what
+  ## metadata is being tagged. To enable, uncomment and add "logging" to exporters below.
+  ## There are two levels that could be used: `debug` and `info` with the former
+  ## being much more verbose and including (sampled) spans content
+  logging:
+    loglevel: debug
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [otlphttp]
+  ## Following generates verbose logs with span content, useful to verify what
+  ## metadata is being tagged. To enable, uncomment and add "telemetry.logs" to service below.
+  ## There are two levels that could be used: `debug` and `info` with the former
+  ## being much more verbose and including (sampled) spans content
+  telemetry:
+    logs:
+      level: debug

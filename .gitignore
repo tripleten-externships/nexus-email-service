@@ -143,3 +143,5 @@ vite.config.ts.timestamp-*
 dist/
 build/
 *.tsbuildinfo
+
+/nes-backend
