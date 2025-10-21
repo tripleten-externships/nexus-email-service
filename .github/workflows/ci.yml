@@ -25,7 +25,7 @@ jobs:
         node-version: [24.x]
 
     env:
-      MONGO_URL: mongodb://localhost:27017/tripleten
+      MONGO_URL: mongodb://localhost:27017/nexus-email-service
 
     steps:
       - name: Checkout code

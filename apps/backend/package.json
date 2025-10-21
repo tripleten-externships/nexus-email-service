@@ -17,10 +17,10 @@
   "scripts": {
     "dev": "serverless offline start --stage local --config serverless.local.yml",
     "debug": "export SLS_DEBUG=* && node --inspect serverless offline --stage local --config serverless.local.yml",
-    "build": "serverless package --package rest-proj --stage local --config serverless.local.yml",
+    "build": "serverless package --package nes-backend --stage local --config serverless.local.yml",
     "lint": "eslint .",
     "lintfix": "eslint --fix .",
-    "test": "MONGO_URL='mongodb://127.0.0.1:27017/tripleten' jest --maxWorkers=15",
+    "test": "MONGO_URL='mongodb://127.0.0.1:27017/nexus-email-service' jest --maxWorkers=15",
     "docs": "serverless openapi generate; redoc-cli bundle openapi.yml --options.theme.colors.primary.main=orange --options.noAutoAuth; open ./redoc-static.html",
     "docs-generate-openapi": "serverless openapi generate;",
     "docs-generate-html": "redoc-cli bundle openapi.yml --options.theme.colors.primary.main=orange --options.noAutoAuth;",

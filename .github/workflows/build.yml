@@ -63,7 +63,7 @@ jobs:
         working-directory: ./apps/backend
         run: npm test
         env:
-          MONGO_URL: mongodb://localhost:27017/tripleten
+          MONGO_URL: mongodb://localhost:27017/nexus-email-service
 
       - name: Run backend linting
         working-directory: ./apps/backend
@@ -82,7 +82,7 @@ jobs:
         run: |
           echo "Packaging serverless backend for ${{ matrix.environment }} environment..."
           npm run build
-          echo "package_name=rest-proj" >> $GITHUB_OUTPUT
+          echo "package_name=nes-backend" >> $GITHUB_OUTPUT
 
   build-frontend:
     runs-on: ubuntu-latest
@@ -173,7 +173,7 @@ jobs:
           - 27017:27017
 
     env:
-      MONGO_URL: mongodb://localhost:27017/tripleten
+      MONGO_URL: mongodb://localhost:27017/nexus-email-service
 
     steps:
       - name: Checkout code
