@@ -50,9 +50,9 @@ provider:
   environment:
     DEPLOYMENT_ENV: 'local'
     ACTIVE_AWS_REGION: 'us-east-1'
-    SENDGRID_LOCAL_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url, 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo'}
-    SENDGRID_LOCAL_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, 'arn:aws:sqs:us-east-1:000000000000:SendGridLocalQueue.fifo'}
-    SUMO_OTLP_HTTP_ENDPOINT_URL: ${ssm:${sls:stage}-sumo_otlp_http_endpoint_url, 'http://127.0.0.1:4318/v1/traces'}
+    SENDGRID_LOCAL_QUEUE_URL: ${self:custom.serverless-offline-ssm.ssm.${sls:stage}-send_grid_sqs_url}
+    SENDGRID_LOCAL_QUEUE_ARN: ${self:custom.serverless-offline-ssm.ssm.${sls:stage}-send_grid_sqs_arn}
+    SUMO_OTLP_HTTP_ENDPOINT_URL: ${self:custom.serverless-offline-ssm.ssm.${sls:stage}-sumo_otlp_http_endpoint_url}
     OTEL_SERVICE_NAME: 'nexus-email-service-traces'
     OTEL_ENVIRONMENT: ${sls:stage}
     OTEL_TRACES_SAMPLER: always_on
