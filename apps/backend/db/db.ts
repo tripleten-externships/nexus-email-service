@@ -3,6 +3,7 @@ import { connect, connection, ConnectOptions } from 'mongoose';
 import { mongooseLazyConnect } from 'mongoose-lazy-connect';
 import { getSSMParameterValue } from '../utils/ssmParameters';
 import log from '../logging/log';
+import { initializeModels } from '../app/models/index';
 
 // As "connection" is in the global scope, Lambda may retain it between
 // function calls thanks to "callbackWaitsForEmptyEventLoop" in the serverless.ts file.
@@ -15,13 +16,16 @@ let testRun = false;
  */
 const resolveMongoURL = async (mongoUri?: string): Promise<string> => {
   if (mongoUri) {
+    log.info('Using provided MongoDB URI');
     return mongoUri;
   }
 
   if (process.env.MONGO_URL) {
+    log.info(`Using MONGO_URL from environment: ${process.env.MONGO_URL}`);
     return process.env.MONGO_URL;
   }
 
+  log.info('No MongoDB URI provided, attempting to get from SSM');
   const mongoURL = await resolveMongoURLFromSSM();
 
   if (!mongoURL) {
@@ -39,7 +43,8 @@ const resolveMongoURLFromSSM = async () => {
 
   try {
     return await getSSMParameterValue(ssmParamName, true);
-  } catch (error) {
+  } catch (err) {
+    const error = err as Error;
     if (
       error.toString().toLowerCase().includes('rate') ||
       error.toString().toLowerCase().includes('disconnected')
@@ -99,16 +104,19 @@ const initializeDBConnection = async ({
 
   try {
     if (lazyConnect) {
+      log.info('Using lazy connection mode');
       mongooseLazyConnect(async () => {
         await connect(mongoURL, connectionOptions);
       });
     } else {
       await connect(mongoURL, connectionOptions);
     }
-  } catch (error) {
+  } catch (err) {
+    const error = err as Error & { reason?: { type?: string } };
+
     log.error(`Error connecting to MongoDB: ${error}`);
 
-    if (error?.reason?.type === 'ReplicaSetNoPrimary') {
+    if (error.reason?.type === 'ReplicaSetNoPrimary') {
       throw new Error('Database Error Replica Set No Primary');
     }
 
@@ -134,9 +142,16 @@ connection.on('connecting', () => {
     log.info('Connecting to MongoDB.');
   }
 });
-connection.on('connected', () => {
+connection.on('connected', async () => {
   log.info('Connected to MongoDB.');
   isConnected = true;
+
+  try {
+    // initialize models and create collections
+    await initializeModels();
+  } catch (error) {
+    log.error(`Failed to initialize models: ${error}`);
+  }
 });
 connection.on('disconnected', () => {
   log.info('Disconnected from MongoDB.');
