@@ -1,6 +1,7 @@
 import * as http from 'http';
 import { connection } from 'mongoose';
 import app from './app/app';
+import initializeDBConnection from './db/db';
 
 require('dotenv').config();
 
@@ -69,10 +70,18 @@ const onError = (error): void => {
  * Event listener for HTTP server "listening" event.
  */
 
-const onListening = (): void => {
+const onListening = async (): Promise<void> => {
   const addr = server.address();
   const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr ? addr?.port : ''}`;
   debug(`Listening on ${bind}`);
+
+  // initialize DB connection when server starts
+  try {
+    await initializeDBConnection({ runServerless: false });
+    console.log('Database connection initialized');
+  } catch (error) {
+    console.error('Failed to initialize database connection:', error);
+  }
 };
 
 /**
@@ -94,7 +103,9 @@ const exitHandler = async (signal: string): Promise<void> => {
 
 server.listen(port);
 server.on('error', onError);
-server.on('listening', onListening);
+server.on('listening', () => {
+  onListening().catch((err) => console.error('Error in onListening handler:', err));
+});
 
 process.on('uncaughtException', async (): Promise<void> => {
   await exitHandler('uncaughtException');
