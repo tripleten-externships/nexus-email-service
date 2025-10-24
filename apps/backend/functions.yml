@@ -19,3 +19,12 @@ index:
             - DeviceId
             - X-DeviceId
             - X-DeviceName
+sendGridHook:
+  name: TRIPLETEN-${sls:stage}-sendGridHook
+  handler: serverless.handler
+  environment:
+    SENDGRID_LOCAL_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url}
+    SENDGRID_LOCAL_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn}
+  iamRoleStatementsInherit: true
+# iamRoleStatements for SQS and associate resource
+# events (http POST, endpoint name)
