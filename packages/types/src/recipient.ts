@@ -1,9 +1,9 @@
 import { Types } from 'mongoose';
 
 export interface IRecipient {
-  _id: Types.ObjectId;
+  _id?: Types.ObjectId;
   email: string;
-  name: string;
+  name?: string;
   status: 'subscribed' | 'unsubscribed' | 'bounced';
   tags?: string[];
   lists?: Types.ObjectId[];
