@@ -3,7 +3,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
-import mongoose from 'mongoose';
 import path from 'path';
 
 import log from '../logging/log';
@@ -16,8 +15,6 @@ log.info(`inDevelopmentMode: ${inDevelopmentMode}`);
 
 const app = express();
 app.disable('x-powered-by');
-
-mongoose.connect('process.env.MONGO_URL');
 
 app.use(
   express.json({
