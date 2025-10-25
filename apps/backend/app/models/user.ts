@@ -1,6 +1,15 @@
 import mongoose, { Schema } from 'mongoose';
 import validator from 'validator';
 
+interface User {
+  email: String;
+  name: String;
+  role: String;
+  password: String;
+  loginTracking: Number | Date;
+  preferences: String;
+}
+
 const userSchema: Schema = new Schema({
   email: {
     type: String,
