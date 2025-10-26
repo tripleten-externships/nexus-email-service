@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import validator from 'validator';
 import { IRecipient } from '../../../../packages/types/src/recipient';
 
 type IRecipientDocument = Omit<IRecipient, '_id'> & Document;
@@ -11,6 +12,10 @@ const recipientSchema = new Schema<IRecipientDocument>(
       unique: true,
       trim: true,
       lowercase: true,
+      validate: {
+        validator: (value: string) => validator.isEmail(value),
+        message: (props: any) => `${props.value} is not a valid email address`,
+      },
     },
     name: { type: String, trim: true },
     status: {
@@ -18,6 +23,10 @@ const recipientSchema = new Schema<IRecipientDocument>(
       enum: ['subscribed', 'unsubscribed', 'bounced'],
       default: 'subscribed',
       index: true,
+      validate: {
+        validator: (value: string) => ['subscribed', 'unsubscribed', 'bounced'].includes(value),
+        message: (props: any) => `${props.value} is not a valid status`,
+      },
     },
     tags: {
       type: [String],
@@ -46,6 +55,14 @@ const recipientSchema = new Schema<IRecipientDocument>(
       type: Map,
       of: Schema.Types.Mixed,
       default: {},
+      validate: {
+        validator: (value: Map<string, any>) => {
+          return Array.from(value.values()).every(
+            (v) => ['string', 'number', 'boolean'].includes(typeof v) || v === null
+          );
+        },
+        message: () => `Custom attributes can only contain string, number, boolean, or null values`,
+      },
     },
   },
   { timestamps: true }

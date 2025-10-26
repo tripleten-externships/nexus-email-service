@@ -14,5 +14,5 @@ export interface IRecipient {
     lastEngagedAt: Date;
   }[];
   customAttributes: Record<string, string | number | boolean | null>;
-  //ask about adding createdAt/updatedAt timestamps
+  //ask about adding createdAt/updatedAt timestamps types
 }
