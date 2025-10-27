@@ -40,6 +40,7 @@ const recipientSchema = new Schema<IRecipientDocument>(
       },
     ],
     engagementHistory: [
+      //inquire about how we will track data
       {
         campaignId: {
           type: Schema.Types.ObjectId,
@@ -70,5 +71,32 @@ const recipientSchema = new Schema<IRecipientDocument>(
 
 const Recipient: Model<IRecipientDocument> =
   mongoose.models.Recipient || mongoose.model<IRecipientDocument>('Recipient', recipientSchema);
+
+// Instance methods
+
+recipientSchema.methods.updateStatus = async function (newStatus: IRecipient['status']) {
+  this.status = newStatus;
+  return this.save();
+};
+
+recipientSchema.methods.ensureListsArray = function () {
+  // ensures lists is always an array
+  this.lists = Array.isArray(this.lists) ? this.lists : [];
+};
+
+recipientSchema.methods.addToList = async function (listId: mongoose.Types.ObjectId) {
+  this.ensureListsArray();
+  const alreadyOnList = this.lists.some((id: mongoose.Types.ObjectId) => id.equals(listId));
+  if (!alreadyOnList) this.lists.push(listId);
+  return this.save();
+};
+
+recipientSchema.methods.removeFromList = async function (listId: mongoose.Types.ObjectId) {
+  this.ensureListsArray();
+  this.lists = this.lists.filter((id: mongoose.Types.ObjectId) => !id.equals(listId));
+  return this.save();
+};
+
+//TODO: Static methods
 
 export default Recipient;
