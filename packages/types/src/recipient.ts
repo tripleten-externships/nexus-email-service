@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface IRecipient {
-  _id?: Types.ObjectId;
+  _id: Types.ObjectId;
   email: string;
   name?: string;
   status: 'subscribed' | 'unsubscribed' | 'bounced';
@@ -14,5 +14,6 @@ export interface IRecipient {
     lastEngagedAt: Date;
   }[];
   customAttributes: Record<string, string | number | boolean | null>;
-  //ask about adding createdAt/updatedAt timestamps types
+  createdAt: Date;
+  updatedAt: Date;
 }
