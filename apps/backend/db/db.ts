@@ -3,7 +3,7 @@ import { connect, connection, ConnectOptions } from 'mongoose';
 import { mongooseLazyConnect } from 'mongoose-lazy-connect';
 import { getSSMParameterValue } from '../utils/ssmParameters';
 import log from '../logging/log';
-import { initializeModels } from '../app/models/index';
+import { initializeModels } from '../app/models';
 
 // As "connection" is in the global scope, Lambda may retain it between
 // function calls thanks to "callbackWaitsForEmptyEventLoop" in the serverless.ts file.

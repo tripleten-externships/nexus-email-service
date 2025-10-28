@@ -1,6 +1,9 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import validator from 'validator';
 
+/**
+ * Email Event Model
+ */
 export interface IEmailEvent extends Document {
   messageId: string;
   recipientEmail: string;
@@ -11,6 +14,9 @@ export interface IEmailEvent extends Document {
   geoLocationData: string;
 }
 
+/**
+ * Mongoose Schema for Email Events
+ */
 const EmailEventSchema: Schema<IEmailEvent> = new Schema<IEmailEvent>(
   {
     messageId: {
@@ -60,19 +66,31 @@ const EmailEventSchema: Schema<IEmailEvent> = new Schema<IEmailEvent>(
   }
 );
 
+/**
+ * Indexes for optimizing query performance
+ */
 EmailEventSchema.index({ messageId: 1, timestamp: -1 });
 EmailEventSchema.index({ messageId: 1, eventType: 1 });
 EmailEventSchema.index({ recipientEmail: 1, eventType: 1 });
 EmailEventSchema.index({ eventType: 1, timestamp: -1 });
 EmailEventSchema.index({ timestamp: -1, geoLocationData: 1 });
 
+/**
+ * TTL Index to auto-delete documents after 90 days
+ */
 EmailEventSchema.index({ timestamp: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
 
+/**
+ * Mongoose Model for Email Events
+ */
 export const EmailEvent: Model<IEmailEvent> = mongoose.model<IEmailEvent>(
   'EmailEvent',
   EmailEventSchema
 );
 
+/**
+ * Analytical Query Functions
+ */
 export async function getEventCountsByType() {
   return EmailEvent.aggregate([
     { $group: { _id: '$eventType', count: { $sum: 1 } } },
@@ -80,6 +98,9 @@ export async function getEventCountsByType() {
   ]);
 }
 
+/**
+ * Get hourly trends of email events for the past 24 hours
+ */
 export async function getHourlyEventTrends() {
   return EmailEvent.aggregate([
     {
@@ -100,6 +121,9 @@ export async function getHourlyEventTrends() {
   ]);
 }
 
+/**
+ * Get geographical engagement data
+ */
 export async function getGeoEngagement() {
   return EmailEvent.aggregate([
     {

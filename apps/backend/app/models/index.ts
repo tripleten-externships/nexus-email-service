@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import log from '../../logging/log';
 
 // import './userModel';
+import './emailEvent.model';
 
 /**
  * Initialize all models and ensure their collections exist in MongoDB
