@@ -28,7 +28,7 @@ const userSchema: Schema = new Schema({
     lastLogin: { type: Date, default: null },
     loginCount: { type: Number, default: 0 },
   },
-  preferences: { type: Map, of: String },
+  // TODO in the future: preferences:
 });
 
 const User = mongoose.model('User', userSchema);
