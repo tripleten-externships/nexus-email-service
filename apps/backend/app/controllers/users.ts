@@ -1,3 +1,4 @@
+import { Request, Response } from 'express';
 import User from '../models/user';
 import mongoose from 'mongoose';
 
@@ -7,7 +8,7 @@ interface MongoError {
 }
 
 // Get all users
-export const getUsers = async (req, res) => {
+export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await User.find({});
     res.send({ data: users });
