@@ -19,6 +19,7 @@ const userSchema: Schema = new Schema({
       validator(value) {
         return validator.isEmail(value);
       },
+      message: 'You must enter a valid email',
     },
   },
   name: { type: String, required: true, unique: true, minlength: 2, maxlength: 30 },
