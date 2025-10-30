@@ -18,7 +18,7 @@ export const getUsers = async (req: Request, res: Response) => {
 };
 
 // Get user by ID
-export const getIndividualUser = async (req, res) => {
+export const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params._id);
     if (!user) {
@@ -71,4 +71,4 @@ export const createUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getIndividualUser, createUser };
+module.exports = { getUsers, getUser, createUser };
