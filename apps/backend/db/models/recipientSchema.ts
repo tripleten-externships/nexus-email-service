@@ -40,18 +40,29 @@ const recipientSchema = new Schema<IRecipientDocument>(
       },
     ],
     engagementHistory: [
-      //inquire about how we will track data
       {
         campaignId: {
           type: Schema.Types.ObjectId,
           ref: 'Campaign',
           required: true,
         },
+        deliveredEmails: { type: Number, default: 0 },
         openedEmails: { type: Number, default: 0 },
         linksClicked: { type: Number, default: 0 },
+        bouncedEmails: { type: Number, default: 0 },
+        spamReports: { type: Number, default: 0 },
+        unsubscribedAt: { type: Date },
         lastEngagedAt: { type: Date },
       },
     ],
+    aggregateEngagement: {
+      totalDelivered: { type: Number, default: 0 },
+      totalOpened: { type: Number, default: 0 },
+      totalClicked: { type: Number, default: 0 },
+      totalBounced: { type: Number, default: 0 },
+      totalSpamReports: { type: Number, default: 0 },
+      totalUnsubscribed: { type: Number, default: 0 },
+    },
     customAttributes: {
       type: Map,
       of: Schema.Types.Mixed,
@@ -69,9 +80,6 @@ const recipientSchema = new Schema<IRecipientDocument>(
   { timestamps: true }
 );
 
-const Recipient: Model<IRecipientDocument> =
-  mongoose.models.Recipient || mongoose.model<IRecipientDocument>('Recipient', recipientSchema);
-
 // Instance methods
 
 recipientSchema.methods.updateStatus = async function (newStatus: IRecipient['status']) {
@@ -79,6 +87,7 @@ recipientSchema.methods.updateStatus = async function (newStatus: IRecipient['st
   return this.save();
 };
 
+// Helper method
 recipientSchema.methods.ensureListsArray = function () {
   // ensures lists is always an array
   this.lists = Array.isArray(this.lists) ? this.lists : [];
@@ -97,6 +106,34 @@ recipientSchema.methods.removeFromList = async function (listId: mongoose.Types.
   return this.save();
 };
 
-//TODO: Static methods
+// updates engagement totals based on engagementHistory (to be called after modifying engagementHistory)
+recipientSchema.methods.updateAggregateEnagement = async function () {
+  // initialize counters for all engagement types
+  const totals = {
+    totalDelivered: 0,
+    totalOpened: 0,
+    totalClicked: 0,
+    totalBounced: 0,
+    totalSpamReports: 0,
+    totalUnsubscribed: 0,
+  };
+  // loop through engagementHistory
+  for (const record of this.engagementHistory) {
+    totals.totalDelivered += record.deliveredEmails || 0;
+    totals.totalOpened += record.openedEmails || 0;
+    totals.totalClicked += record.linksClicked || 0;
+    totals.totalBounced += record.bouncedEmails || 0;
+    totals.totalSpamReports += record.spamReports || 0;
+    if (record.unsubscribedAt) totals.totalUnsubscribed += 1;
+  }
+  // update and save new totals
+  this.aggregateEngagement = totals;
+  return this.save();
+};
+
+//hold off: Static methods
+
+const Recipient: Model<IRecipientDocument> =
+  mongoose.models.Recipient || mongoose.model<IRecipientDocument>('Recipient', recipientSchema);
 
 export default Recipient;
