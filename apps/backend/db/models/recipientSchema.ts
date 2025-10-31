@@ -1,8 +1,10 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 import validator from 'validator';
 import { IRecipient } from '../../../../packages/types/src/recipient';
+import { IRecipientMethods } from '../../../../packages/types/src/recipient';
 
-type IRecipientDocument = Omit<IRecipient, '_id'> & Document;
+type IRecipientDocument = IRecipient & Document;
+type RecipientModel = Model<IRecipientDocument, {}, IRecipientMethods>;
 
 const recipientSchema = new Schema<IRecipientDocument>(
   {
@@ -106,8 +108,31 @@ recipientSchema.methods.removeFromList = async function (listId: mongoose.Types.
   return this.save();
 };
 
+recipientSchema.methods.recordEngagement = async function (
+  campaignId: mongoose.Types.ObjectId,
+  field: keyof IRecipient['engagementHistory'][0]
+) {
+  // find the matching campaign record inside engagementHistory
+  const record = this.engagementHistory.find((r: any) => r.campaignId.equals(campaignId));
+
+  if (!record) {
+    // if the campaign doesn't exist yet, create a new record
+    this.engagementHistory.push({
+      campaignId,
+      [field]: 1,
+      lastEngagedAt: new Date(),
+    });
+  } else {
+    // if the campaign already exists, increment the field count
+    record[field] = (record[field] || 0) + 1;
+    record.lastEngagedAt = new Date();
+  }
+
+  return this.save();
+};
+
 // updates engagement totals based on engagementHistory (to be called after modifying engagementHistory)
-recipientSchema.methods.updateAggregateEnagement = async function () {
+recipientSchema.methods.updateAggregateEngagement = async function () {
   // initialize counters for all engagement types
   const totals = {
     totalDelivered: 0,
@@ -133,7 +158,8 @@ recipientSchema.methods.updateAggregateEnagement = async function () {
 
 //hold off: Static methods
 
-const Recipient: Model<IRecipientDocument> =
-  mongoose.models.Recipient || mongoose.model<IRecipientDocument>('Recipient', recipientSchema);
+const Recipient =
+  (mongoose.models.Recipient as RecipientModel) ||
+  mongoose.model<IRecipientDocument, RecipientModel>('Recipient', recipientSchema);
 
 export default Recipient;
