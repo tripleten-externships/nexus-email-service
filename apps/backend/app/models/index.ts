@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import log from '../../logging/log';
 
-import User from './user';
+import './user';
 
 /**
  * Initialize all models and ensure their collections exist in MongoDB
