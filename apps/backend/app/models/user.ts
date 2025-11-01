@@ -24,7 +24,7 @@ const userSchema: Schema = new Schema({
     },
   },
   name: { type: String, required: true, unique: true, minlength: 2, maxlength: 30 },
-  role: { type: String, required: true, enum: ['admin', 'editor', 'viewer'] },
+  role: { type: String, required: true, enum: ['admin', 'editor', 'viewer'], default: 'viewer' },
   password: { type: String, required: true, minlength: 8 },
   loginTracking: {
     lastLogin: { type: Date, default: null },
