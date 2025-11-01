@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/user';
 import mongoose from 'mongoose';
+import * as bcrypt from 'bcryptjs';
 
 // Use custom interface that includes code property
 interface MongoError {
@@ -48,7 +49,8 @@ export const createUser = async (req, res) => {
       return res.status(409).send({ message: 'A user with this email already exists.' });
     }
 
-    const user = await User.create({ email, name, role, password });
+    const hash = await bcrypt.hash(password, 10);
+    const user = await User.create({ email, name, role, password: hash });
 
     res.status(201).send({
       email: user.email,
