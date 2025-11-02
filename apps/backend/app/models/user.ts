@@ -1,7 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 import validator from 'validator';
+import * as bcrypt from 'bcryptjs';
 
-interface User {
+interface IUser {
   email: String;
   name: String;
   role: String;
@@ -10,7 +11,11 @@ interface User {
   preferences: String;
 }
 
-const userSchema: Schema = new Schema({
+interface UserModelStatic extends Model<IUser> {
+  findUserByCredentials(email: String, password: String);
+}
+
+const userSchema: Schema = new Schema<IUser>({
   email: {
     type: String,
     required: true,
@@ -33,5 +38,15 @@ const userSchema: Schema = new Schema({
   // TODO in the future: preferences:
 });
 
-const User = mongoose.model('User', userSchema);
-export default User;
+userSchema.statics.findUserByCredentials = async function findUserByCredentials(email, password) {
+  const user = await this.findOne({ email }).select('+password');
+  if (!user) return null;
+
+  const matched = await bcrypt.compare(password, user.password);
+  if (!matched) return null;
+
+  return user;
+};
+
+export const User = mongoose.model<IUser, UserModelStatic>('User', userSchema);
+// export default User;
