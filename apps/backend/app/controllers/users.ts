@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { User } from '../models/user';
 import mongoose from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
+import { JWT_SECRET } from '../utils/config';
 
 // Use custom interface that includes code property
 interface MongoError {
@@ -73,7 +75,7 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
-export const logIn = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -86,6 +88,11 @@ export const logIn = async (req: Request, res: Response) => {
     if (user === null) {
       return res.status(401).send({ message: 'Incorrect email or password.' });
     }
+
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      expiresIn: '7d',
+    });
+    return res.send({ token });
   } catch (err: unknown) {
     return res.status(401).send({ message: 'Unauthorized request.' });
   }

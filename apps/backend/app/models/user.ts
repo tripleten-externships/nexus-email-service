@@ -49,4 +49,3 @@ userSchema.statics.findUserByCredentials = async function findUserByCredentials(
 };
 
 export const User = mongoose.model<IUser, UserModelStatic>('User', userSchema);
-// export default User;
