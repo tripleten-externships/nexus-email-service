@@ -77,7 +77,7 @@ const onListening = async (): Promise<void> => {
 
   // initialize DB connection when server starts
   try {
-    await initializeDBConnection({ runServerless: false });
+    await initializeDBConnection({ runServerless: true });
     console.log('Database connection initialized');
   } catch (error) {
     console.error('Failed to initialize database connection:', error);
