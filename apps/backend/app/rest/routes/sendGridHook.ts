@@ -63,7 +63,7 @@ router.post('/webhook/sendgrid', async (req, res) => {
     //create a function that loops through each batch and accesses each batch
     // create array of promises, one for each batch (look into SendMessageBatchCommand from client-sqs package)
     // send current chunk of messages in batch
-
+    log.debug(`${batches}`);
     const config = {};
     const client = new SQSClient(config);
     const promises = batches.map((batch) => {
