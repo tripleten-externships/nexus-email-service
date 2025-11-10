@@ -1,6 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult, SQSEvent, SQSHandler } from 'aws-lambda';
 import { SQSClient, SendMessageBatchCommand } from '@aws-sdk/client-sqs';
-import { ObjectId } from 'mongodb';
 import log from '../../../logging/log';
 //import express and create variable for router and set it to express.router
 import * as express from 'express';
@@ -9,13 +7,12 @@ import * as express from 'express';
  * Returns a 200 response after parsing data in JSON
  * and inserting webhook data into collection using SQS
  *
- * @param event - APIGatewayProxyEvent w/ body, headers,
- * HTTP method POST, and query string parameters
  * @returns Status 200 or 500
  */
 
 const router = express.Router();
 
+//event properties to be used in message batches
 const eventRecordProperties = [
   'event',
   'timestamp',
@@ -64,7 +61,6 @@ router.post('/webhook/sendgrid', async (req, res) => {
     }
 
     //create a function that loops through each batch and accesses each batch
-
     // create array of promises, one for each batch (look into SendMessageBatchCommand from client-sqs package)
     // send current chunk of messages in batch
 
@@ -89,13 +85,5 @@ router.post('/webhook/sendgrid', async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-//Parses event logic for different events (open, clicks, bounces, etc.)
-//Includes SQS message processing
-//Integrates with EmailEvent model data (schema? to db here?)
-//Includes error handling and retry mechanisms
-//Includes CouldWatch logging and OpenTelemetry instrumentation
-
-//Require POST URL for testing on Postman (make fake test?)
 
 export default router;
