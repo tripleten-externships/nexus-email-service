@@ -4,6 +4,8 @@ services:
     container_name: 'mongodb'
     ports:
       - 27017:27017
+      # - 27019:27019
+    # command: mongod --port 27019
     volumes:
       - mongodb_data:/data/db
     networks:
