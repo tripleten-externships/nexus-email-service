@@ -19,3 +19,22 @@ index:
             - DeviceId
             - X-DeviceId
             - X-DeviceName
+sendGridHook:
+  name: TRIPLETEN-${sls:stage}-sendGridHook
+  handler: serverless.handler
+  environment:
+    SENDGRID_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url, 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo'}
+    SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, 'arn:aws:sqs:us-east-1:000000000000:SendGridLocalQueue.fifo'}
+  iamRoleStatementsInherit: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+        - sqs:ReceiveMessage
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+      Resource: '*'
+  events:
+    - http:
+        method: post
+        path: webhook/sendgrid
