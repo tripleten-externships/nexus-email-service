@@ -29,19 +29,22 @@ const eventRecordProperties = [
 router.post('/webhook/sendgrid', async (req, res) => {
   try {
     log.debug(`${JSON.stringify(req.body)}`);
-    const events = JSON.parse(req.body);
+    const events = req.body;
     // iterate through events
     // reduce the message down to the set of the fields we want in the event record
 
     const messages = events.map((event) => {
       log.info(`Processing event: ${JSON.stringify(event)}`);
       // reduce the message down to just the set of fields we want in the EventRecord
-      const record = eventRecordProperties.reduce((rec, field) => {
-        if (event[field]) {
-          rec[field] = event[field];
-        }
-        return rec;
-      }, {});
+      const record = eventRecordProperties.reduce(
+        (rec, field) => {
+          if (event[field]) {
+            rec[field] = event[field];
+          }
+          return rec;
+        },
+        {} as Record<string, any>
+      );
       const eventId = event.sg_event_id;
       return {
         Id: eventId,
@@ -51,9 +54,8 @@ router.post('/webhook/sendgrid', async (req, res) => {
       };
     });
 
-    log.debug(`${messages}`);
     // chunk messages into batches of <= 10 (max SQS batch size)
-    const batchSize = 0;
+    const batchSize = 10;
     const batches: (typeof messages)[][] = []; //an array of arrays
     for (let i = 0; i < messages.length; i += batchSize) {
       //create batches of 10
@@ -61,21 +63,21 @@ router.post('/webhook/sendgrid', async (req, res) => {
     }
 
     //create a function that loops through each batch and accesses each batch
-    // create array of promises, one for each batch (look into SendMessageBatchCommand from client-sqs package)
-    // send current chunk of messages in batch
-    log.debug(`${batches}`);
+    //create array of promises, one for each batch
+    //send current chunk of messages in batch
+    log.debug(`Checking batches: ${JSON.stringify(batches)}`);
     const config = {};
     const client = new SQSClient(config);
     const promises = batches.map((batch) => {
       return client.send(
         new SendMessageBatchCommand({
-          QueueUrl: 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo', //what URL and how to access it
+          QueueUrl: 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo',
           Entries: batch,
         })
       );
     });
 
-    const results = Promise.allSettled(promises);
+    const results = await Promise.allSettled(promises);
 
     // execute all send commands concurrently
 
