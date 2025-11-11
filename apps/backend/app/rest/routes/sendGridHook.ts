@@ -1,16 +1,41 @@
-import { SQSClient, SendMessageBatchCommand } from '@aws-sdk/client-sqs';
+import {
+  SQSClient,
+  SendMessageBatchCommand,
+  SendMessageBatchCommandOutput,
+  SQSClientConfig,
+} from '@aws-sdk/client-sqs';
+import { createDefaultUserAgentProvider } from '@aws-sdk/util-user-agent-node';
 import log from '../../../logging/log';
 //import express and create variable for router and set it to express.router
 import * as express from 'express';
-
-/**
- * Returns a 200 response after parsing data in JSON
- * and inserting webhook data into collection using SQS
- *
- * @returns Status 200 or 500
- */
+import { SendGridEventMessage } from '../../types/sendGridEvents';
 
 const router = express.Router();
+
+const SQS_QUEUE_URL = process.env.SENDGRID_EVENTS_QUEUE_URL;
+const CURRENT_AWS_REGION = process.env.CURRENT_AWS_REGION || 'us-east-1';
+const isOffline = process.env.DEPLOYMENT_ENV === 'local';
+
+async function createSqsClient() {
+  const userAgent = await createDefaultUserAgentProvider({
+    serviceId: 'nexus-sendgrid-hook',
+    clientVersion: '3.435.0',
+  })();
+
+  const config: SQSClientConfig = {
+    region: CURRENT_AWS_REGION,
+    customUserAgent: userAgent,
+  };
+
+  // if running offline, override the endpoint to local ElasticMQ host
+  if (isOffline) {
+    config.endpoint = 'http://127.0.0.1:9324';
+  }
+
+  return new SQSClient(config);
+}
+
+const sqsClientPromise = createSqsClient();
 
 //event properties to be used in message batches
 const eventRecordProperties = [
@@ -26,16 +51,38 @@ const eventRecordProperties = [
   'attempt',
 ];
 
+//create a function that loops through each batch and accesses each batch
+function chunkArray<T>(array: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += size) {
+    chunks.push(array.slice(i, i + size));
+  }
+  return chunks;
+}
+
+/**
+ * Returns a 200 response after parsing data in JSON
+ * and inserting webhook data into collection using SQS
+ *
+ * @returns Status 200 or 500
+ */
 router.post('/webhook/sendgrid', async (req, res) => {
+  const events: SendGridEventMessage[] = req.body;
+  let totalSuccessful = 0;
+  let totalFailed = 0;
+
+  if (!events || !Array.isArray(events)) {
+    log.warn('Received invalid or empty events array from SendGrid.');
+    return res.status(400).json({ error: 'Invalid events array' });
+  }
   try {
     log.debug(`${JSON.stringify(req.body)}`);
-    const events = req.body;
-    // iterate through events
-    // reduce the message down to the set of the fields we want in the event record
+    const sqsClient = await sqsClientPromise;
 
-    const messages = events.map((event) => {
+    // iterate through events
+    const messages = events.map((event: SendGridEventMessage) => {
       log.info(`Processing event: ${JSON.stringify(event)}`);
-      // reduce the message down to just the set of fields we want in the EventRecord
+      // reduce the message down to the set of the fields we want in the event record
       const record = eventRecordProperties.reduce(
         (rec, field) => {
           if (event[field]) {
@@ -55,37 +102,48 @@ router.post('/webhook/sendgrid', async (req, res) => {
     });
 
     // chunk messages into batches of <= 10 (max SQS batch size)
-    const batchSize = 10;
-    const batches: (typeof messages)[][] = []; //an array of arrays
-    for (let i = 0; i < messages.length; i += batchSize) {
-      //create batches of 10
-      batches.push(messages.slice(i, i + batchSize));
-    }
+    const batches = chunkArray(messages, 10);
 
-    //create a function that loops through each batch and accesses each batch
-    //create array of promises, one for each batch
-    //send current chunk of messages in batch
     log.debug(`Checking batches: ${JSON.stringify(batches)}`);
-    const config = {};
-    const client = new SQSClient(config);
-    const promises = batches.map((batch) => {
-      return client.send(
-        new SendMessageBatchCommand({
-          QueueUrl: 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo',
-          Entries: batch,
-        })
-      );
+    //create array of promises, one for each batch
+    const promises = batches.map((chunk) => {
+      const sendCommand = new SendMessageBatchCommand({
+        QueueUrl: SQS_QUEUE_URL,
+        Entries: chunk,
+      });
+      //send current chunk of messages in batch
+      return sqsClient.send(sendCommand);
     });
-
+    // execute all send commands concurrently
     const results = await Promise.allSettled(promises);
 
-    // execute all send commands concurrently
+    // process the results of each batch
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        const response: SendMessageBatchCommandOutput = result.value;
+        if (response.Successful) {
+          totalSuccessful += response.Successful.length;
+        }
+        if (response.Failed && response.Failed.length > 0) {
+          totalFailed += response.Failed.length;
+          log.warn(`Failed to send batch of ${response.Failed.length} messages: `, response.Failed);
+        }
+      } else {
+        // if the promise was rejected, count entire batch as failed
+        totalFailed += 1;
+        log.error('Error sending batch: ', result.reason);
+      }
+    });
 
-    return res.status(200).json();
+    log.info(
+      `Processed and sent ${totalSuccessful} SendGrid mail delivery events to SQS. Total failures: ${totalFailed}.`
+    );
   } catch (error) {
     log.error(error);
     return res.status(500).json({ error: 'Internal server error' });
   }
+
+  return res.status(200).json('success');
 });
 
 export default router;
