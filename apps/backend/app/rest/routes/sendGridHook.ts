@@ -10,10 +10,9 @@ import log from '../../../logging/log';
 import * as express from 'express';
 import { SendGridEventMessage } from '../../types/sendGridEvents';
 
-const router = express.Router();
-
 const SQS_QUEUE_URL = process.env.SENDGRID_EVENTS_QUEUE_URL;
 const CURRENT_AWS_REGION = process.env.CURRENT_AWS_REGION || 'us-east-1';
+
 const isOffline = process.env.DEPLOYMENT_ENV === 'local';
 
 async function createSqsClient() {
@@ -36,6 +35,7 @@ async function createSqsClient() {
 }
 
 const sqsClientPromise = createSqsClient();
+const router = express.Router();
 
 //event properties to be used in message batches
 const eventRecordProperties = [
