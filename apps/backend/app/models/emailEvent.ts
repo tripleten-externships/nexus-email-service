@@ -1,10 +1,10 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, Model } from 'mongoose';
 import validator from 'validator';
 
 /**
  * Email Event Model
  */
-export interface IEmailEvent extends Document {
+export interface IEmailEvent {
   messageId: string;
   recipientEmail: string;
   eventType: string;
@@ -17,38 +17,34 @@ export interface IEmailEvent extends Document {
 /**
  * Mongoose Schema for Email Events
  */
-const EmailEventSchema: Schema<IEmailEvent> = new Schema<IEmailEvent>(
+export const EmailEventSchema = new Schema<IEmailEvent>(
   {
     messageId: {
       type: String,
       required: true,
-      index: true,
     },
     recipientEmail: {
       type: String,
       required: true,
       validate: {
-        validator: validator.isEmail,
+        validator: (v: string) => validator.isEmail(v),
         message: 'Invalid email address',
       },
-      index: true,
     },
     eventType: {
       type: String,
       required: true,
-      index: true,
     },
     timestamp: {
       type: Date,
       required: true,
       default: Date.now,
-      index: true,
     },
     ipAddress: {
       type: String,
       required: true,
       validate: {
-        validator: validator.isIP,
+        validator: (v: string) => validator.isIP(v),
         message: 'Invalid IP address',
       },
     },
