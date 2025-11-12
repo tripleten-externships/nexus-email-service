@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -8,7 +8,7 @@ interface CustomRequest extends Request {
   user?: string | jwt.JwtPayload;
 }
 
-export const auth = (req: CustomRequest, res: Response) => {
+export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -24,5 +24,5 @@ export const auth = (req: CustomRequest, res: Response) => {
     return res.status(401).send({ message: 'Authorization required.' });
   }
 
-  return (req.user = payload);
+  return next();
 };

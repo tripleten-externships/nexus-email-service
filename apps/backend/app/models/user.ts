@@ -3,16 +3,19 @@ import validator from 'validator';
 import * as bcrypt from 'bcryptjs';
 
 interface IUser {
-  email: String;
-  name: String;
-  role: String;
-  password: String;
-  loginTracking: Number | Date;
-  preferences: String;
+  email: string;
+  name: string;
+  role: string;
+  password: string;
+  loginTracking: {
+    lastLogin: Date;
+    loginAttempts: number;
+  };
+  preferences: string;
 }
 
 interface UserModelStatic extends Model<IUser> {
-  findUserByCredentials(email: String, password: String);
+  findUserByCredentials(email: string, password: string);
 }
 
 const userSchema: Schema = new Schema<IUser>({
@@ -33,7 +36,7 @@ const userSchema: Schema = new Schema<IUser>({
   password: { type: String, required: true, minlength: 8, select: false },
   loginTracking: {
     lastLogin: { type: Date, default: null },
-    loginCount: { type: Number, default: 0 },
+    loginAttempts: { type: Number, default: 0 },
   },
   // TODO in the future: preferences:
 });

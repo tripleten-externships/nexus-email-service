@@ -12,8 +12,8 @@ interface MongoError {
 // Get all users
 export const getUsers = async (req: Request, res: Response) => {
   try {
-    const users = await User.find({});
-    res.send({ data: users });
+    const users = await User.find({}).select('-password');
+    res.send({ success: true, data: users });
   } catch (err: unknown) {
     res.status(500).send({ message: 'Error retrieving users.' });
   }
@@ -22,7 +22,7 @@ export const getUsers = async (req: Request, res: Response) => {
 // Get user by ID
 export const getUser = async (req: Request, res: Response) => {
   try {
-    const user = await User.findById(req.params._id);
+    const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).send({ message: 'User not found.' });
     }
@@ -90,7 +90,12 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const JWT_SECRET = process.env.JWT_SECRET;
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+
+    if (!JWT_SECRET) {
+      return res.status(500).send({ message: 'JWT_SECRET is not defined and is required.' });
+    }
+
+    const token = jwt.sign({ id: user.id }, JWT_SECRET, {
       expiresIn: '1d',
     });
     return res.send({ token });
