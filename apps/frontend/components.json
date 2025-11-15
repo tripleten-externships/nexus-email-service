@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.js",
+    "css": "src/global/default.css",
+    "baseColor": "slate",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@nexus-email/components",
+    "utils": "@nexus-email/lib/utils",
+    "ui": "@nexus-email/components/ui",
+    "lib": "@nexus-email/lib",
+    "hooks": "@nexus-email/hooks"
+  },
+  "registries": {}
+}
