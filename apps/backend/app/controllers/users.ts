@@ -3,6 +3,7 @@ import { User } from '../models/user';
 import mongoose from 'mongoose';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
+import log from '../../logging/log';
 
 // Use custom interface that includes code property
 interface MongoError {
@@ -44,6 +45,10 @@ export const createUser = async (req: Request, res: Response) => {
     return res.status(400).send({ message: 'Password required.' });
   }
 
+  if (!name) {
+    return res.status(400).send({ message: 'Name required.' });
+  }
+
   try {
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -59,7 +64,7 @@ export const createUser = async (req: Request, res: Response) => {
       role: user.role,
     });
   } catch (err: unknown) {
-    console.error(err);
+    log.error(err);
 
     if (typeof err === 'object' && err !== null && 'code' in err) {
       const mongoError = err as MongoError;
@@ -71,6 +76,8 @@ export const createUser = async (req: Request, res: Response) => {
         return res.status(400).send({ message: 'Invalid input, please try again.' });
       }
     }
+
+    return res.status(500).send({ message: 'Error creating user.' });
   }
 };
 
@@ -95,7 +102,7 @@ export const login = async (req: Request, res: Response) => {
       return res.status(500).send({ message: 'JWT_SECRET is not defined and is required.' });
     }
 
-    const token = jwt.sign({ id: user.id }, JWT_SECRET, {
+    const token = jwt.sign({ id: user._id.toString() }, JWT_SECRET, {
       expiresIn: '1d',
     });
     return res.send({ token });

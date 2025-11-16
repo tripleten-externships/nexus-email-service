@@ -1,4 +1,4 @@
-import mongoose, { Schema, Model } from 'mongoose';
+import mongoose, { Schema, Model, Document, Types } from 'mongoose';
 import validator from 'validator';
 import * as bcrypt from 'bcryptjs';
 
@@ -14,8 +14,12 @@ interface IUser {
   preferences: string;
 }
 
-interface UserModelStatic extends Model<IUser> {
-  findUserByCredentials(email: string, password: string);
+interface IUserDocument extends IUser, Document {
+  _id: Types.ObjectId;
+}
+
+interface UserModelStatic extends Model<IUserDocument> {
+  findUserByCredentials(email: string, password: string): Promise<IUserDocument | null>;
 }
 
 const userSchema: Schema = new Schema<IUser>({
@@ -51,4 +55,4 @@ userSchema.statics.findUserByCredentials = async function findUserByCredentials(
   return user;
 };
 
-export const User = mongoose.model<IUser, UserModelStatic>('User', userSchema);
+export const User = mongoose.model<IUserDocument, UserModelStatic>('User', userSchema);

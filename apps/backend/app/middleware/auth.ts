@@ -1,8 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 // Create a custom Request interface to add the 'user' property
 interface CustomRequest extends Request {
   user?: string | jwt.JwtPayload;
@@ -16,10 +14,15 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
   }
 
   const token = authorization.replace('Bearer ', '');
-  let payload;
+  const JWT_SECRET = process.env.JWT_SECRET;
+
+  if (!JWT_SECRET) {
+    return res.status(500).send({ message: 'Server configuration error.' });
+  }
 
   try {
-    payload = jwt.verify(token, JWT_SECRET);
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
   } catch (err: unknown) {
     return res.status(401).send({ message: 'Authorization required.' });
   }
