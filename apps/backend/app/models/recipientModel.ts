@@ -381,8 +381,8 @@ recipientSchema.statics.getEngagedRecipients = async function (minEngagementRate
   });
 };
 
-const Recipient =
+const RecipientModel =
   (mongoose.models.Recipient as IRecipientModel) ||
   mongoose.model<IRecipientDocument, IRecipientModel>('Recipient', recipientSchema);
 
-export default Recipient;
+export default RecipientModel;
