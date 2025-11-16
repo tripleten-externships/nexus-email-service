@@ -31,7 +31,7 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "prepare": "husky install",
-    "backend:dev": "NODE_PATH=$NODE_PATH:$(pwd)/node_modules turbo run dev --filter=pipeline-email-service",
+    "backend:dev": "turbo run dev --filter=pipeline-email-service",
     "backend:build": "turbo run build --filter=pipeline-email-service",
     "backend:start": "turbo run start --filter=pipeline-email-service",
     "frontend:dev": "turbo run dev --filter=nexus-email-frontend",

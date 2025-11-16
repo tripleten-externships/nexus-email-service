@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 
+import router from './rest/routes/sendGridHook';
+
 import log from '../logging/log';
 
 dotenv.config();
@@ -56,6 +58,8 @@ app.use(async (req, res, next) => {
   res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
   next();
 });
+
+app.use(router);
 
 app.get('/', (req, res) => {
   res.status(200).send('Hello World');

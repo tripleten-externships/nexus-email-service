@@ -145,3 +145,6 @@ build/
 *.tsbuildinfo
 
 /nes-backend
+
+# Ignore IDE specific files
+.idea/
