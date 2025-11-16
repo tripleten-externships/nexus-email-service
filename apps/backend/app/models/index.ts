@@ -3,6 +3,7 @@ import log from '../../logging/log';
 
 import './user';
 import './emailEvent';
+import './task';
 
 /**
  * Initialize all models and ensure their collections exist in MongoDB
