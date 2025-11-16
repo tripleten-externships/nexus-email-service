@@ -45,6 +45,7 @@ receiveSendGridHookEvents:
     - http:
         method: post
         path: webhook/sendgrid
+        documentation: ${file(docs/endpoints/sendGridWebhook.doc.yml)}
 processSendGridEventsTask:
   name: TRIPLETEN-${sls:stage}-sendGridProcessorTask
   handler: serverless.processSendGridEventsTask

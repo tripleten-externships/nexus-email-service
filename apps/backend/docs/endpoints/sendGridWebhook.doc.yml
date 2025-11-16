@@ -1,0 +1,26 @@
+summary: 'SendGrid Webhook Receiver'
+description: 'Receives event notifications from SendGrid about email delivery status (delivered, bounced, opened, clicked, etc.) and queues them for processing via SQS.'
+operationId: 'receiveSendGridWebhook'
+tags:
+  - 'Webhooks'
+requestBody:
+  description: 'Array of SendGrid event objects'
+  required: true
+requestModels:
+  application/json: 'SendGridWebhookRequest'
+methodResponses:
+  - statusCode: 200
+    responseBody:
+      description: 'Events successfully received and queued for processing'
+    responseModels:
+      application/json: 'SendGridWebhookResponse'
+  - statusCode: 400
+    responseBody:
+      description: 'Invalid events array'
+    responseModels:
+      application/json: 'Error'
+  - statusCode: 500
+    responseBody:
+      description: 'Internal server error'
+    responseModels:
+      application/json: 'Error'
