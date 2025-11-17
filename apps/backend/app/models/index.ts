@@ -1,8 +1,10 @@
 import mongoose from 'mongoose';
 import log from '../../logging/log';
 
-// import './userModel';
+import './user';
 import './emailEvent';
+import './task';
+import './message';
 
 /**
  * Initialize all models and ensure their collections exist in MongoDB

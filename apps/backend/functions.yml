@@ -19,12 +19,19 @@ index:
             - DeviceId
             - X-DeviceId
             - X-DeviceName
-sendGridHook:
-  name: TRIPLETEN-${sls:stage}-sendGridHook
+main:
+  name: TASK-${sls:stage}-main
+  handler: serverless.mainHandler
+  events:
+    - schedule:
+        name: TASK-${sls:stage}-main-every-${self:custom.runEvery}m
+        rate: ${self:custom.scheduling.${sls:stage}}
+receiveSendGridHookEvents:
+  name: TRIPLETEN-${sls:stage}-sendGridHookReceiver
   handler: serverless.handler
   environment:
-    SENDGRID_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url, 'http://127.0.0.1:9324/queue/SendGridLocalQueue.fifo'}
-    SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, 'arn:aws:sqs:us-east-1:000000000000:SendGridLocalQueue.fifo'}
+    SENDGRID_QUEUE_URL: ${ssm:${sls:stage}-send_grid_sqs_url, self:custom.serverless-offline-ssm.ssm.${sls:stage}-send_grid_sqs_url}}
+    SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, self:custom.serverless-offline-ssm.ssm.${sls:stage}-send_grid_sqs_arn}
   iamRoleStatementsInherit: true
   iamRoleStatements:
     - Effect: Allow
@@ -38,3 +45,24 @@ sendGridHook:
     - http:
         method: post
         path: webhook/sendgrid
+        documentation: ${file(docs/endpoints/sendGridWebhook.doc.yml)}
+processSendGridEventsTask:
+  name: TRIPLETEN-${sls:stage}-sendGridProcessorTask
+  handler: serverless.processSendGridEventsTask
+  timeout: 120
+  environment:
+    SENDGRID_QUEUE_ARN: ${ssm:${sls:stage}-send_grid_sqs_arn, self:custom.serverless-offline-ssm.ssm.${sls:stage}-send_grid_sqs_arn}
+  iamRoleStatementsInherit: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:ReceiveMessage
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+        - sqs:SendMessage
+      Resource: ${self:provider.environment.SENDGRID_QUEUE_ARN}
+  events:
+    - sqs:
+        arn: ${self:provider.environment.SENDGRID_QUEUE_ARN}
+        functionResponseType: ReportBatchItemFailures
+        batchSize: 10

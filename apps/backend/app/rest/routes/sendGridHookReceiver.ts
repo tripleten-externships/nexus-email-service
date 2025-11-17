@@ -8,7 +8,7 @@ import { createDefaultUserAgentProvider } from '@aws-sdk/util-user-agent-node';
 import log from '../../../logging/log';
 //import express and create variable for router and set it to express.router
 import * as express from 'express';
-import { SendGridEventMessage } from '../../types/sendGridEvents';
+import { eventRecordProperties, SendGridEventMessage } from '../../types/sendGridEvents';
 
 const SQS_QUEUE_URL = process.env.SENDGRID_EVENTS_QUEUE_URL;
 const CURRENT_AWS_REGION = process.env.CURRENT_AWS_REGION || 'us-east-1';
@@ -36,20 +36,6 @@ async function createSqsClient() {
 
 const sqsClientPromise = createSqsClient();
 const router = express.Router();
-
-//event properties to be used in message batches
-const eventRecordProperties = [
-  'event',
-  'timestamp',
-  'reason',
-  'status',
-  'ip',
-  'url',
-  'response',
-  'sendId',
-  'sg_event_id',
-  'attempt',
-];
 
 //create a function that loops through each batch and accesses each batch
 function chunkArray<T>(array: T[], size: number): T[][] {

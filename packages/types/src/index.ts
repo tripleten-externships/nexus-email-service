@@ -23,3 +23,22 @@ export interface PaginatedResponse<T> {
   hasNext: boolean;
   hasPrev: boolean;
 }
+
+// Export recipient types
+export type {
+  IRecipient,
+  IRecipientMethods,
+  IRecipientQueryHelpers,
+  IEngagementHistory,
+  IAggregateEngagement,
+} from './recipient';
+
+// Export message types
+export type {
+  IMessage,
+  IMessageMethods,
+  IMessageQueryHelpers,
+  IAttachment,
+  IRecipientStatus,
+  MessageStatus,
+} from './message';

@@ -5,6 +5,9 @@ plugins:
   - serverless-domain-manager
   - serverless-openapi-documenter
   - serverless-iam-roles-per-function
+  - serverless-offline-ssm
+  - serverless-offline-sqs
+  - serverless-offline
 custom:
   siteKey: tripleten
   esbuild:
@@ -15,6 +18,11 @@ custom:
     packager: 'npm'
     external: ['mongodb', '@aws-sdk']
     plugins: './plugins.js'
+  runEvery: 5
+  scheduling:
+    dev: cron(*/2 * * * ? *)
+    staging: cron(*/2 * * * ? *)
+    prod: cron(*/5 * * * ? *)
   nodeEnv:
     dev: development
     staging: production
@@ -96,4 +104,5 @@ provider:
       - ${ssm:${self:custom.siteKey}-${sls:stage}_vpc_private_subnet_id_1}
   logs:
     httpApi: true
+
 functions: ${file(./functions.yml)}

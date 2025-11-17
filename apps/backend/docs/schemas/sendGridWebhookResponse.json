@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SendGrid Webhook Success Response",
+  "type": "string",
+  "description": "Success response from the SendGrid webhook endpoint",
+  "example": "success"
+}

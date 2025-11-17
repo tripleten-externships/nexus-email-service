@@ -3,6 +3,21 @@
 
   @see https://sendgrid.com/docs/for-developers/tracking-events/event/#events
 */
+
+// event properties to be used in message batches
+export const eventRecordProperties = [
+  'event',
+  'timestamp',
+  'reason',
+  'status',
+  'ip',
+  'url',
+  'response',
+  'sendId',
+  'sg_event_id',
+  'attempt',
+];
+
 export enum SendGridEventType {
   // nexus email service types (not defined by sendgrid)
   QUEUED = 'queued', // activity created, but not sent to sendgrid

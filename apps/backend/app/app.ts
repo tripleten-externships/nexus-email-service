@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import path from 'path';
 
-import router from './rest/routes/sendGridHook';
+import router from './rest/routes/sendGridHookReceiver';
 
 import log from '../logging/log';
 

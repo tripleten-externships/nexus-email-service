@@ -12,6 +12,7 @@ export interface IEmailEvent {
   ipAddress: string;
   userAgent: string;
   geoLocationData: string;
+  internalMessageId?: mongoose.Types.ObjectId;
 }
 
 /**
@@ -55,6 +56,11 @@ export const EmailEventSchema = new Schema<IEmailEvent>(
     geoLocationData: {
       type: String,
       required: true,
+    },
+    internalMessageId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Message',
+      index: true,
     },
   },
   {
