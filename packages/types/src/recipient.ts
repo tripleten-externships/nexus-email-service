@@ -7,28 +7,24 @@ export interface IRecipient {
   status: 'subscribed' | 'unsubscribed' | 'bounced';
   tags?: string[];
   lists?: Types.ObjectId[];
-  engagementHistory: [
-    {
-      campaignId: Types.ObjectId;
-      openedEmails: number;
-      linksClicked: number;
-      deliveredEmails: number;
-      bouncedEmails: number;
-      unsubscribedAt: Date;
-      spamReports: number;
-      lastEngagedAt: Date;
-    },
-  ];
-  aggregateEngagement: [
-    {
-      totalDelivered: number;
-      totalOpened: number;
-      totalClicked: number;
-      totalBounced: number;
-      totalSpamReports: number;
-      totalUnsubscribed: number;
-    },
-  ];
+  engagementHistory: {
+    campaignId: Types.ObjectId;
+    openedEmails: number;
+    linksClicked: number;
+    deliveredEmails: number;
+    bouncedEmails: number;
+    unsubscribedAt: Date;
+    spamReports: number;
+    lastEngagedAt: Date;
+  }[];
+  aggregateEngagement: {
+    totalDelivered: number;
+    totalOpened: number;
+    totalClicked: number;
+    totalBounced: number;
+    totalSpamReports: number;
+    totalUnsubscribed: number;
+  };
   customAttributes: Record<string, string | number | boolean | null>;
   createdAt: Date;
   updatedAt: Date;
@@ -42,6 +38,6 @@ export interface IRecipientMethods {
   updateAggregateEngagement(): Promise<IRecipient>;
   recordEngagement(
     campaignId: Types.ObjectId,
-    field: keyof IRecipient['engagementHistory'][0]
+    field: keyof IRecipient['engagementHistory'][]
   ): Promise<IRecipient>;
 }
