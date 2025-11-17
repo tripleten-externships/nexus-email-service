@@ -32,3 +32,13 @@ export type {
   IEngagementHistory,
   IAggregateEngagement,
 } from './recipient';
+
+// Export message types
+export type {
+  IMessage,
+  IMessageMethods,
+  IMessageQueryHelpers,
+  IAttachment,
+  IRecipientStatus,
+  MessageStatus,
+} from './message';
