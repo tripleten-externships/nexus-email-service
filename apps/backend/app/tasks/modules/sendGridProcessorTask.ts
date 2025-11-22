@@ -1,4 +1,5 @@
 import {
+  SendMessageCommand,
   DeleteMessageBatchCommand,
   ReceiveMessageCommand,
   SQSClient,
@@ -31,6 +32,22 @@ const sqsClient = new SQSClient({
 const processBatch = async (messages: Message[], failures: SQSBatchItemFailure[]) => {
   // this is the stub for the actual processing of the messages
   // TODO: Implement actual message processing logic
+  const params = {
+    QueueUrl: SQS_QUEUE_URL,
+    MessageBody: JSON.stringify(messages),
+    MessageGroupId: 'emails',
+    DelaySeconds: 10,
+  };
+
+  for (const message of messages) {
+    try {
+      console.log('Handling message', message.MessageId);
+      await sqsClient.send(new SendMessageCommand(params));
+    } catch (err) {
+      console.error('Failed message: ', message.MessageId, err);
+      failures.push({ itemIdentifier: message.MessageId! });
+    }
+  }
 };
 
 // helper function for local use to simulate Lambda polling and processing of the messages
@@ -67,16 +84,29 @@ const pollAndProcess = async (
 };
 
 // stub for the actual handler. expected to return Promise<SQSBatchResponse>
-const handler: SQSHandler = async (event: SQSEvent, ctx: Context, cb?: Callback) => {
+const handler: SQSHandler = async (
+  event: SQSEvent,
+  ctx: Context,
+  cb?: Callback
+): Promise<SQSBatchResponse> => {
+  const failures: SQSBatchItemFailure[] = [];
   if (ctx) {
     ctx.callbackWaitsForEmptyEventLoop = false;
   }
+  if (cb) {
+    cb(null, Response);
+  }
   try {
     // TODO: Process SQS messages
+    await processBatch(event.Records, failures);
     log.info('Processing SQS event');
   } catch (error) {
     log.error('Error processing SQS event:', error);
     // TODO: Handle errors / SQS message failures
+    const response: SQSBatchResponse = {
+      batchItemFailures: failures,
+    };
+    return response;
   } finally {
     if (sqsClient) {
       sqsClient.destroy();
