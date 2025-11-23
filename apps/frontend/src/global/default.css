@@ -222,3 +222,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duraction: 0s;
+    --motion-ease: linear;
+  }
+
+  * {
+    animation-duration: var(--motion-duration) !important;
+    animation-timing-function: var(--motion-ease) !important;
+    transition-duration: var(--motion-duration) !important;
+    transition-timing-function: var(--motion-ease) !important;
+  }
+}
