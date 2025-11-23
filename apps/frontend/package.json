@@ -37,6 +37,7 @@
     "@headlessui/tailwindcss": "0.2.2",
     "@heroicons/react": "2.2.0",
     "@keystone-6/document-renderer": "^0.0.0-rc-20250730060834",
+    "@radix-ui/react-slot": "1.2.4",
     "@tailwindcss/vite": "^4.1.11",
     "class-variance-authority": "0.7.1",
     "classnames": "2.5.1",

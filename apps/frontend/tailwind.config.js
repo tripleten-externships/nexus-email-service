@@ -2,6 +2,7 @@ import HeadlessTailwindPlugin from '@headlessui/tailwindcss';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['class'],
   content: ['./index.html', './src/**/*.{html,js,jsx,ts,tsx}'],
   mode: 'jit',
   purge: ['./public/**/*.html', './src/**/*.{js,jsx,ts,tsx,vue}'],
@@ -24,6 +25,15 @@ export default {
         lightPurple: '#f3d3fb',
         purple: '#e286f9',
         red: '#ff3636',
+
+        // Shadcn-style colors
+        primary: 'oklch(var(--primary))',
+        foreground: 'oklch(var(--foreground))',
+        background: 'oklch(var(--background))',
+        success: 'oklch(var(--success))',
+        destructive: 'oklch(var(--destructive))',
+        muted: 'oklch(var(--muted))',
+        accent: 'oklch(var(--accent))',
       },
       backgroundImage: (theme) => ({
         'gradient-welcome': `linear-gradient(to bottom, ${theme('colors.lightYellow')}, ${theme(
