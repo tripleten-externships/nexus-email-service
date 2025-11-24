@@ -5,7 +5,12 @@
     "jsx": "react-jsx",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@nexus-email/components/*": ["src/components/*"],
+      "@nexus-email/lib/*": ["packages/lib/src/*"]
+    }
   },
   "references": [{ "path": "./tsconfig.node.json" }]
 }

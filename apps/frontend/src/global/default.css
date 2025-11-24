@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital@0;1&display=swap');
 
-@plugin 'tailwindcss-animate';
+/* @plugin 'tailwindcss-animate'; */
 @import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,500;1,500&display=swap');
 
 @import 'tailwindcss';
@@ -16,6 +16,8 @@
       system-ui sans-serif;
   }
 }
+
+@plugin 'tailwindcss-animate';
 
 /* App Layout Styles */
 .app-container {
@@ -223,6 +225,7 @@
   }
 }
 
+/* User's system preference of reduced motion */
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-duraction: 0s;
