@@ -13,6 +13,4 @@ export interface IInAppMessage {
   readAt: Date | null;
   deletedBySender: boolean;
   deletedByRecipient: boolean;
-  createdAt: Date;
-  updatedAt: Date;
 }
