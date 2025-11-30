@@ -4,6 +4,7 @@ import {
   ReceiveMessageCommand,
   SQSClient,
   Message,
+  MessageAttributeValue,
 } from '@aws-sdk/client-sqs';
 
 import {
@@ -13,6 +14,7 @@ import {
   SQSBatchResponse,
   SQSEvent,
   SQSHandler,
+  SQSRecord,
 } from 'aws-lambda';
 import log from '../../../logging/log';
 // import RecipientModel from '../../models/recipientModel';
@@ -29,14 +31,40 @@ const sqsClient = new SQSClient({
   ...(isOffline && { endpoint: 'http://127.0.0.1:9324' }), // if running offline, override the endpoint to local ElasticMQ host
 });
 
+function convertToMessage(record: SQSRecord): Message {
+  const messageAttributes: Record<string, MessageAttributeValue> = {};
+
+  if (record.messageAttributes) {
+    for (const key of Object.keys(record.messageAttributes ?? {})) {
+      const attribute = record.messageAttributes[key];
+
+      messageAttributes[key] = {
+        StringValue: attribute.stringValue,
+        BinaryValue: attribute.binaryValue as any,
+        StringListValues: attribute.stringListValues,
+        BinaryListValues: attribute.binaryListValues as any,
+        DataType: attribute.dataType,
+      };
+    }
+  }
+
+  return {
+    MessageId: record.messageId,
+    ReceiptHandle: record.receiptHandle,
+    MD5OfBody: record.md5OfBody,
+    Body: record.body,
+    Attributes: record.attributes,
+    MD5OfMessageAttributes: record.md5OfMessageAttributes,
+    MessageAttributes: messageAttributes,
+  };
+}
+
 const processBatch = async (messages: Message[], failures: SQSBatchItemFailure[]) => {
   // this is the stub for the actual processing of the messages
-  // TODO: Implement actual message processing logic
   const params = {
     QueueUrl: SQS_QUEUE_URL,
     MessageBody: JSON.stringify(messages),
     MessageGroupId: 'emails',
-    DelaySeconds: 10,
   };
 
   for (const message of messages) {
@@ -97,21 +125,20 @@ const handler: SQSHandler = async (
     cb(null, Response);
   }
   try {
-    // TODO: Process SQS messages
-    await processBatch(event.Records, failures);
+    const messages: Message[] = event.Records.map(convertToMessage);
+    await processBatch(messages, failures);
     log.info('Processing SQS event');
   } catch (error) {
     log.error('Error processing SQS event:', error);
-    // TODO: Handle errors / SQS message failures
-    const response: SQSBatchResponse = {
-      batchItemFailures: failures,
-    };
-    return response;
   } finally {
     if (sqsClient) {
       sqsClient.destroy();
     }
   }
+  const response: SQSBatchResponse = {
+    batchItemFailures: failures,
+  };
+  return response;
 };
 
 export default handler;
