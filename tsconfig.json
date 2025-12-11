@@ -4,7 +4,8 @@
     "baseUrl": ".",
     "paths": {
       "@nexus-email/*": ["packages/*/src"]
-    }
+    },
+    "jsx": "react-jsx"
   },
   "include": ["packages/*/src/**/*", "apps/backend/src/**/*"],
   "exclude": [
