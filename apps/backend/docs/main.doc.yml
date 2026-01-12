@@ -15,3 +15,11 @@ documentation:
       description: 'This is the model for any error returned to the client.'
       contentType: 'application/json'
       schema: ${file(docs/schemas/error.json)}
+    - name: 'SendGridWebhookRequest'
+      description: 'Request body for SendGrid webhook events.'
+      contentType: 'application/json'
+      schema: ${file(docs/schemas/sendGridWebhookRequest.json)}
+    - name: 'SendGridWebhookResponse'
+      description: 'Response body for successful SendGrid webhook processing.'
+      contentType: 'application/json'
+      schema: ${file(docs/schemas/sendGridWebhookResponse.json)}

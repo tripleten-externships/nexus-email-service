@@ -5,6 +5,14 @@ import { createServer, proxy } from 'aws-serverless-express';
 import dotenv from 'dotenv';
 import app from './app/app';
 
+// task handlers
+import mainHandler from './app/tasks/handlers/mainHandler';
+import runnerHandler from './app/tasks/handlers/runnerHandler';
+import processSendGridEventsTask from './app/tasks/modules/sendGridProcessorTask';
+
+// import task modules to register them
+import './app/tasks/modules/sendGridProcessorTask';
+
 dotenv.config();
 
 const server = createServer(app);
@@ -36,3 +44,16 @@ process.on('unhandledRejection', (reason) => {
   console.log(reason);
   process.exit(3);
 });
+
+// Export task scheduler handlers
+exports.mainHandler = (event, context, callback) => {
+  return mainHandler(event, context, callback);
+};
+
+exports.runnerHandler = (event, context, callback) => {
+  return runnerHandler(event, context, callback);
+};
+
+// hand SQS handler function directly to AWS for proper handling
+// of SQS message deletion based on batchItemFailures
+exports.processSendGridEventsTask = processSendGridEventsTask;

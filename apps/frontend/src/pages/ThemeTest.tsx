@@ -1,7 +1,7 @@
 import React from 'react';
-import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
-import { Input } from '../components/ui/input';
+import { Button } from '@nexus-email/components/ui/button';
+import { Card } from '@nexus-email/components/ui/card';
+import { Input } from '@nexus-email/components/ui/input';
 
 export default function ThemeTest() {
   const colors = [
@@ -43,6 +43,7 @@ export default function ThemeTest() {
       <div className="flex flex-wrap gap-4 justify-center">
         {colors.map((color) => (
           <div
+            key={color}
             className="p-4 w-36 h-20 rounded-lg text-center"
             style={{
               backgroundColor: `var(--${color})`,

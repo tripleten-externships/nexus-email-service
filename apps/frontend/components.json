@@ -12,10 +12,10 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "src/components",
-    "utils": "packages/lib/src/utils",
-    "ui": "src/components/ui",
-    "lib": "packages/lib/src",
+    "components": "@nexus-email/components",
+    "utils": "@nexus-email/lib/utils",
+    "ui": "@nexus-email/components/ui",
+    "lib": "@nexus-email/lib",
     "hooks": "@nexus-email/hooks"
   },
   "registries": {}
