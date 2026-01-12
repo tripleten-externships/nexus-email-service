@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SendGrid Webhook Request",
+  "type": "array",
+  "description": "Array of SendGrid event objects sent via webhook",
+  "items": {
+    "type": "object",
+    "properties": {
+      "event": {
+        "type": "string",
+        "description": "Type of event (processed, delivered, bounce, open, click, etc.)",
+        "example": "delivered"
+      },
+      "timestamp": {
+        "type": "number",
+        "description": "Unix timestamp of the event",
+        "example": 1699564800
+      },
+      "sg_event_id": {
+        "type": "string",
+        "description": "Unique identifier for this event from SendGrid",
+        "example": "abc123def456"
+      },
+      "sendId": {
+        "type": "string",
+        "description": "Internal identifier for the email that was sent",
+        "example": "507f1f77bcf86cd799439011"
+      },
+      "email": {
+        "type": "string",
+        "description": "Recipient email address",
+        "example": "user@example.com"
+      },
+      "reason": {
+        "type": "string",
+        "description": "Reason for delivery failure (for bounce/dropped events)",
+        "example": "Mailbox not found"
+      },
+      "status": {
+        "type": "string",
+        "description": "SMTP status code (for bounce/deferred events)",
+        "example": "5.1.1"
+      },
+      "ip": {
+        "type": "string",
+        "description": "IP address of the recipient (for open/click events)",
+        "example": "192.168.1.1"
+      },
+      "url": {
+        "type": "string",
+        "description": "URL that was clicked (for click events)",
+        "example": "https://example.com/link"
+      }
+    },
+    "required": ["event", "timestamp", "sg_event_id"]
+  }
+}
