@@ -16,6 +16,9 @@ export default defineConfig({
   resolve: {
     alias: {
       'src/lib/utils': path.resolve(__dirname, '../../packages/lib/src/utils.ts'),
+      '@nexus-email/components': path.resolve(__dirname, '../../packages/ui/src/components'),
+      '@nexus-email/components/ui': path.resolve(__dirname, '../../packages/ui/src/components/ui'),
+      '@nexus-email/lib': path.resolve(__dirname, '../../packages/lib/src'),
     },
   },
   define: {

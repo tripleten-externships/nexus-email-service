@@ -8,8 +8,8 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@nexus-email/components/*": ["src/components/*"],
-      "@nexus-email/lib/*": ["packages/lib/src/*"]
+      "@nexus-email/components/*": ["../../packages/ui/src/components/*"],
+      "@nexus-email/lib/*": ["../../packages/lib/src/*"]
     }
   },
   "references": [{ "path": "./tsconfig.node.json" }]
