@@ -10,9 +10,6 @@ const viteApiUrl = env.VITE_API_URL || 'http://localhost:3001';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 3000,
-  },
   resolve: {
     alias: {
       'src/lib/utils': path.resolve(__dirname, '../../packages/lib/src/utils.ts'),
@@ -20,6 +17,9 @@ export default defineConfig({
       '@nexus-email/components/ui': path.resolve(__dirname, '../../packages/ui/src/components/ui'),
       '@nexus-email/lib': path.resolve(__dirname, '../../packages/lib/src'),
     },
+  },
+  server: {
+    port: 3000,
   },
   define: {
     global: 'globalThis',
