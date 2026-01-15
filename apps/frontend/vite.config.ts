@@ -1,5 +1,6 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
+import path from 'path';
 
 const env = loadEnv('', process.cwd(), '');
 
@@ -9,6 +10,14 @@ const viteApiUrl = env.VITE_API_URL || 'http://localhost:3001';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      'src/lib/utils': path.resolve(__dirname, '../../packages/lib/src/utils.ts'),
+      '@nexus-email/components': path.resolve(__dirname, '../../packages/ui/src/components'),
+      '@nexus-email/components/ui': path.resolve(__dirname, '../../packages/ui/src/components/ui'),
+      '@nexus-email/lib': path.resolve(__dirname, '../../packages/lib/src'),
+    },
+  },
   server: {
     port: 3000,
   },

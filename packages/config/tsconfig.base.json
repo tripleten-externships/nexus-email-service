@@ -11,6 +11,10 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
+      //Top four for Shadcn component imports
+      "@nexus-email/components/ui/*": ["../../packages/components/ui/*"],
+      "@nexus-email/components/*": ["../../packages/components/*"],
+      "@nexus-email/lib/*": ["../../packages/lib/src/*"],
       "@nexus-email/*": ["../../packages/*/src"]
     }
   },

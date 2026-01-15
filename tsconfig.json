@@ -1,11 +1,14 @@
 {
   "extends": "./packages/config/tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@nexus-email/*": ["packages/*/src"]
-    }
-  },
+  // "compilerOptions": {
+  //   "baseUrl": ".",
+  //   "paths": {
+  //     "@nexus-email/components/ui/*": ["../../packages/components/ui/src/*"],
+  //     "@nexus-email/components/*": ["../../packages/components/src/*"],
+  //     "@nexus-email/lib/*": ["../../packages/lib/src/*"],
+  //     "@nexus-email/*": ["../../packages/*/src"]
+  //   }
+  // },
   "include": ["packages/*/src/**/*", "apps/backend/src/**/*"],
   "exclude": [
     "node_modules",
