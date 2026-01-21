@@ -148,3 +148,5 @@ build/
 
 # Ignore IDE specific files
 .idea/
+
+.DS_Store

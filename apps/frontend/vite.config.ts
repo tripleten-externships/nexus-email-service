@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 
@@ -9,6 +10,12 @@ const viteApiUrl = env.VITE_API_URL || 'http://localhost:3001';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@nexus-email/ui': fileURLToPath(new URL('../../packages/ui/src', import.meta.url)),
+    },
+  },
   server: {
     port: 3000,
   },
