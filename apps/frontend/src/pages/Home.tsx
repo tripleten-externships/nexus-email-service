@@ -9,8 +9,8 @@ export default function HomePage() {
         <h1 className="home-title">Welcome to TripleTen Nexus Email Service</h1>
         <p className="home-subtitle">Your home page</p>
         <Button
-          className="mt-6"
-          variant="destructive"
+          className="mt-6 bg-red-500"
+          variant="default"
           onClick={() => {
             alert('Button clicked');
           }}

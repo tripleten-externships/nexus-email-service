@@ -4,17 +4,18 @@
   "rsc": false,
   "tsx": true,
   "tailwind": {
-    "config": "",
-    "css": "../../packages/ui/src/styles/globals.css",
+    "config": "tailwind.config.js",
+    "css": "src/styles/globals.css",
     "baseColor": "zinc",
-    "cssVariables": true
+    "cssVariables": true,
+    "prefix": ""
   },
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
+    "utils": "@/lib/utils",
     "hooks": "@/hooks",
     "lib": "@/lib",
-    "utils": "@nexus-email/ui/lib/utils",
-    "ui": "@nexus-email/ui/components"
+    "ui": "@/components"
   }
 }
