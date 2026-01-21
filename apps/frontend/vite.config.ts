@@ -1,4 +1,6 @@
+import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
+import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig, loadEnv } from 'vite';
 
 const env = loadEnv('', process.cwd(), '');
@@ -8,7 +10,18 @@ const viteApiUrl = env.VITE_API_URL || 'http://localhost:3001';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    tsconfigPaths({
+      projects: [
+        fileURLToPath(new URL('./tsconfig.json', import.meta.url)),
+        fileURLToPath(new URL('../../packages/ui/tsconfig.json', import.meta.url)),
+      ],
+    }),
+  ],
+  resolve: {
+    alias: {},
+  },
   server: {
     port: 3000,
   },

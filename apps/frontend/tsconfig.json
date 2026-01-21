@@ -1,11 +1,17 @@
 {
   "extends": "../../packages/config/tsconfig.frontend.json",
   "compilerOptions": {
+    "baseUrl": ".",
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@nexus-email/ui/*": ["../../packages/ui/src/*"]
+    }
   },
+  "include": ["src", "../../packages/ui/src"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
