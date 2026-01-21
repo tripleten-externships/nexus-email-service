@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@nexus-email/ui/src/components/button';
+import { Button } from '@/components/ui/button';
 // import { Card } from '@nexus-email/ui/src/components/card';
 // import { Input } from '@nexus-email/ui/src/components/input';
 
