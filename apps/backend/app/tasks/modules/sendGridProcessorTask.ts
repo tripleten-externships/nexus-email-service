@@ -1,5 +1,4 @@
 import {
-  SendMessageCommand,
   DeleteMessageBatchCommand,
   ReceiveMessageCommand,
   SQSClient,
@@ -60,16 +59,16 @@ function convertToMessage(record: SQSRecord): Message {
 
 const processBatch = async (messages: Message[], failures: SQSBatchItemFailure[]) => {
   // this is the stub for the actual processing of the messages
-  const params = {
-    QueueUrl: SQS_QUEUE_URL,
-    MessageBody: JSON.stringify(messages),
-    MessageGroupId: 'emails',
-  };
-
+  // const params = {
+  //   QueueUrl: SQS_QUEUE_URL,
+  //   MessageBody: JSON.stringify(messages),
+  //   MessageGroupId: 'emails',
+  // };
   for (const message of messages) {
     try {
       console.log('Handling message', message.MessageId);
-      await sqsClient.send(new SendMessageCommand(params));
+      const messageData = JSON.parse(message.Body || '{}');
+      console.log('Processing message data:', messageData);
     } catch (err) {
       console.error('Failed message: ', message.MessageId, err);
       failures.push({ itemIdentifier: message.MessageId! });
