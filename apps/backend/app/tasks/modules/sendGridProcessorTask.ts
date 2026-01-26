@@ -8,7 +8,6 @@ import {
 } from '@aws-sdk/client-sqs';
 
 import {
-  Callback,
   Context,
   SQSBatchItemFailure,
   SQSBatchResponse,
@@ -112,17 +111,10 @@ const pollAndProcess = async (
 };
 
 // stub for the actual handler. expected to return Promise<SQSBatchResponse>
-const handler: SQSHandler = async (
-  event: SQSEvent,
-  ctx: Context,
-  cb?: Callback
-): Promise<SQSBatchResponse> => {
+const handler: SQSHandler = async (event: SQSEvent, ctx: Context): Promise<SQSBatchResponse> => {
   const failures: SQSBatchItemFailure[] = [];
   if (ctx) {
     ctx.callbackWaitsForEmptyEventLoop = false;
-  }
-  if (cb) {
-    cb(null, Response);
   }
   try {
     const messages: Message[] = event.Records.map(convertToMessage);
